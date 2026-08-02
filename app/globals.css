@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: #FFFFFF;
+  color: #141210;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #A8987C;
+  color: #ffffff;
+}
+
+/* Accessibility Focus Visible Ring */
+*:focus-visible {
+  outline: 2px solid #B78F5E;
+  outline-offset: 2px;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background-color: #F5F5F5;
+  background-image: linear-gradient(90deg, #F5F5F5 0%, #E8E8E8 20%, #FFFFFF 50%, #E8E8E8 80%, #F5F5F5 100%);
+  background-size: 800px 100%;
+  animation: skeletonShimmer 1.75s ease-in-out infinite;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.content-fade-in {
+  animation: contentFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skeleton-fade-out {
+  animation: contentFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) reverse forwards;
+}
+
+@keyframes loadingLine {
+  0% {
+    left: -50%;
+    width: 30%;
+  }
+  50% {
+    left: 30%;
+    width: 60%;
+  }
+  100% {
+    left: 100%;
+    width: 30%;
+  }
+}
+
+.animate-loading-line {
+  animation: loadingLine 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
