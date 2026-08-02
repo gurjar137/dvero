@@ -2,7 +2,6 @@
 import { useProducts } from '@/lib/useProducts';
 import { useSettings, SettingsProvider } from '@/lib/useSettings';
 import { Hero } from '@/components/Hero';
-import { FitSlider } from '@/components/FitSlider';
 import { BestSellerCard } from '@/components/BestSellerCard';
 import { ShopTheEdit } from '@/components/ShopTheEdit';
 import { HomepageGenericSection } from '@/components/HomepageGenericSection';
@@ -99,7 +98,6 @@ function HomePageContent({ initialProducts }: { initialProducts: Product[] }) {
   const { products: clientProducts } = useProducts();
   const { settings } = useSettings();
   const products = clientProducts.length > 0 ? clientProducts : initialProducts;
-  const trousers = products.filter(p => p.category === 'Trousers');
 
   const theme = settings.homepage_theme || DEFAULT_HOMEPAGE_THEME;
   const sections = (settings.homepage_sections && settings.homepage_sections.length > 0
@@ -114,19 +112,14 @@ function HomePageContent({ initialProducts }: { initialProducts: Product[] }) {
           return <Hero key="hero" />;
         }
         if (section.id === 'shop_by_style') {
-          return (
-            <div key="shop_by_style">
-              <ShopTheEdit />
-              <FeaturesStrip />
-              <FitSlider trousers={trousers} />
-            </div>
-          );
+          return <ShopTheEdit key="shop_by_style" />;
         }
         if (section.id === 'featured_collection') {
           return <FeaturedCollectionSection key="featured_collection" section={section} products={products} containerWidth={theme.container_width} />;
         }
         return <HomepageGenericSection key={section.id} section={section} theme={theme} />;
       })}
+      <FeaturesStrip />
     </main>
   );
 }

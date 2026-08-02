@@ -1,4 +1,4 @@
-// File: C:\Users\dharm\Downloads\dvero-nextjs-fixed_1\dvero-nextjs\app\layout.tsx
+// File: E:\D-VERO\dvero-nextjs\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
