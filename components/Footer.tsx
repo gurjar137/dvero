@@ -1,9 +1,13 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export function Footer() {
   const [subscribed, setSubscribed] = useState(false);
+  const pathname = usePathname();
+
+  if (pathname?.startsWith('/admin')) return null;
   return (
     <footer className="bg-ink text-bg pt-14 md:pt-20 pb-8">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-5 md:px-14">

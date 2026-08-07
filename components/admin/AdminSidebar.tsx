@@ -91,14 +91,13 @@ const ICONS: Record<string, JSX.Element> = {
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: 'dash' },
   { href: '/admin/products', label: 'Products', icon: 'box' },
-  { href: '/admin/inventory', label: 'Inventory', icon: 'layers' },
   { href: '/admin/categories', label: 'Categories', icon: 'grid' },
   { href: '/admin/orders', label: 'Orders', icon: 'bag' },
   { href: '/admin/users', label: 'Customers', icon: 'users' },
-  { href: '/admin/reviews', label: 'Reviews', icon: 'star' },
+  { href: '/admin/inventory', label: 'Inventory', icon: 'layers' },
   { href: '/admin/coupons', label: 'Coupons', icon: 'tag' },
+  { href: '/admin/reviews', label: 'Reviews', icon: 'star' },
   { href: '/admin/media', label: 'Homepage Manager', icon: 'image' },
-  { href: '/admin/analytics', label: 'Analytics & SEO', icon: 'chart' },
   { href: '/admin/settings', label: 'Settings', icon: 'gear' },
   { href: '/admin/profile', label: 'My Profile', icon: 'user' },
 ];

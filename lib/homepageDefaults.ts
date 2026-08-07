@@ -1,4 +1,39 @@
-import { HomepageHero, HomepageSection, HomepageTheme, PromoBanners } from './types';
+import { FeaturedProductsSettings, HomepageHero, HomepageSection, HomepageSettings, HomepageTheme, NavbarSettings, PromoBanners } from './types';
+
+export const DEFAULT_FEATURED_PRODUCTS_SETTINGS: FeaturedProductsSettings = {
+  enabled: true,
+  product_ids: [],
+};
+
+export const DEFAULT_NAVBAR_SETTINGS: NavbarSettings = {
+  logo_url: '/D\'VERO.logo.png',
+  desktop_menu_items: [
+    { id: '1', label: 'Shirts', url: '/category/shirts' },
+    { id: '2', label: 'Trousers', url: '/category/trousers' },
+    { id: '3', label: 'About', url: '/about' },
+  ],
+  mobile_menu_items: [
+    { id: '1', label: 'Shirts', url: '/category/shirts' },
+    { id: '2', label: 'Trousers', url: '/category/trousers' },
+    { id: '3', label: 'About Us', url: '/about' },
+    { id: '4', label: 'Contact', url: '/contact' },
+  ],
+  announcement_bar_enabled: false,
+  announcement_text: 'Complimentary shipping on orders above ₹2,999',
+  transparent_navbar: true,
+  sticky_navbar: true,
+};
+
+export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {
+  hero_height_desktop: '90vh',
+  hero_height_mobile: '100dvh',
+  products_per_row_desktop: 4,
+  products_per_row_tablet: 2,
+  products_per_row_mobile: 1,
+  enable_newsletter: true,
+  enable_footer: true,
+  show_featured_products: true,
+};
 
 export const DEFAULT_HOMEPAGE_HERO: HomepageHero = {
   enabled: true,

@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from './CartContext';
 import { useAuth } from './AuthContext';
@@ -31,6 +31,35 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Dynamically measure navbar height and set CSS variable --navbar-height
+  useEffect(() => {
+    if (!headerRef.current) return;
+
+    const updateNavbarHeight = () => {
+      if (headerRef.current) {
+        const height = headerRef.current.offsetHeight;
+        if (height > 0) {
+          document.documentElement.style.setProperty('--navbar-height', `${height}px`);
+        }
+      }
+    };
+
+    updateNavbarHeight();
+
+    const observer = new ResizeObserver(() => {
+      updateNavbarHeight();
+    });
+
+    observer.observe(headerRef.current);
+    window.addEventListener('resize', updateNavbarHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateNavbarHeight);
+    };
+  }, [pathname]);
 
   // Scroll listener for sticky transparent-to-solid transition
   useEffect(() => {
@@ -86,11 +115,14 @@ export function Header() {
       )
     : [];
 
+  if (pathname?.startsWith('/admin')) return null;
+
   const isTransparent = pathname === '/' && !isScrolled;
 
   return (
     <>
       <header
+        ref={headerRef}
         className={`transition-all duration-300 ease-in-out ${
           isTransparent
             ? 'absolute top-0 left-0 right-0 z-40 bg-transparent text-white border-b border-transparent shadow-none backdrop-blur-none'

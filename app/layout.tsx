@@ -11,6 +11,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BackToTop } from '@/components/BackToTop';
 import { ScrollRestorer } from '@/components/ScrollRestorer';
+import { MainLayoutWrapper } from '@/components/MainLayoutWrapper';
 
 const oswald = Oswald({ subsets: ['latin'], weight: ['300', '400', '500', '600'], variable: '--font-oswald' });
 const inter = Inter({ subsets: ['latin'], weight: ['300', '400', '500', '600'], variable: '--font-inter' });
@@ -77,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <ScrollRestorer />
                   </Suspense>
                   <Header />
-                  {children}
+                  <MainLayoutWrapper>{children}</MainLayoutWrapper>
                   <Footer />
                   <BackToTop />
                 </CartProvider>

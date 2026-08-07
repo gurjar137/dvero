@@ -2,11 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --navbar-height: 65px;
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+}
+
 html {
   scroll-behavior: smooth;
   max-width: 100vw;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
+}
+
+.storefront-main-layout {
+  min-height: 100vh;
+  padding-top: calc(var(--navbar-height, 65px) + var(--safe-area-inset-top, 0px));
+  transition: padding-top 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.storefront-main-layout.is-homepage {
+  padding-top: 0 !important;
 }
 
 body {

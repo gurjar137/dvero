@@ -234,7 +234,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (authLoading || !session) return <main className="py-24 text-center text-mute font-oswald text-xs uppercase">Loading Account...</main>;
+  if (authLoading || !session) return <div className="py-24 text-center text-mute font-oswald text-xs uppercase">Loading Account...</div>;
 
   // Account completion calculator
   const completionSteps = [
@@ -256,7 +256,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <main className="page-fade py-8 md:py-16 min-h-[70vh]">
+    <div className="page-fade py-8 md:py-16 min-h-[70vh]">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-5 md:px-14">
         {/* Profile Header Card */}
         <div className="bg-panel border border-line rounded-lg p-6 sm:p-8 mb-8 shadow-sm2 flex flex-wrap justify-between items-center gap-6">
@@ -838,6 +838,6 @@ export default function ProfilePage() {
 
       {/* Toast Alert Component */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-    </main>
+    </div>
   );
 }

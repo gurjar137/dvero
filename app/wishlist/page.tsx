@@ -13,7 +13,7 @@ export default function WishlistPage() {
     .filter(Boolean) as typeof products;
 
   return (
-    <main className="page-fade py-12 md:py-20 min-h-[65vh]">
+    <div className="page-fade py-12 md:py-20 min-h-[65vh]">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-5 md:px-14">
         <div className="flex justify-between items-end mb-8 border-b border-line pb-6">
           <div>
@@ -55,6 +55,6 @@ export default function WishlistPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

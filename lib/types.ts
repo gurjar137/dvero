@@ -246,6 +246,38 @@ export type HomepageTheme = {
   container_width: number;
 };
 
+export type FeaturedProductsSettings = {
+  enabled: boolean;
+  product_ids: string[];
+};
+
+export type MenuItem = {
+  id: string;
+  label: string;
+  url: string;
+};
+
+export type NavbarSettings = {
+  logo_url: string;
+  desktop_menu_items: MenuItem[];
+  mobile_menu_items: MenuItem[];
+  announcement_bar_enabled: boolean;
+  announcement_text: string;
+  transparent_navbar: boolean;
+  sticky_navbar: boolean;
+};
+
+export type HomepageSettings = {
+  hero_height_desktop: string;
+  hero_height_mobile: string;
+  products_per_row_desktop: number;
+  products_per_row_tablet: number;
+  products_per_row_mobile: number;
+  enable_newsletter: boolean;
+  enable_footer: boolean;
+  show_featured_products: boolean;
+};
+
 export type SiteSettings = {
   free_shipping_threshold: number;
   flat_shipping_rate: number;
@@ -258,6 +290,9 @@ export type SiteSettings = {
   homepage_sections?: HomepageSection[];
   homepage_theme?: HomepageTheme;
   promo_banners?: PromoBanners;
+  featured_products_settings?: FeaturedProductsSettings;
+  navbar_settings?: NavbarSettings;
+  homepage_settings?: HomepageSettings;
 };
 
 export type Profile = {
