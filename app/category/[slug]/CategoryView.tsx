@@ -101,7 +101,7 @@ export function CategoryView({ slug, fit }: { slug: string; fit?: string }) {
   const contentReady = !loading && imagesReady;
 
   return (
-    <main className="page-fade py-10 md:py-16 min-h-[50vh]">
+    <main className="page-fade pt-20 pb-10 md:pt-24 md:pb-16 min-h-[50vh]">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-5 md:px-14">
         {/* Skeleton and real content occupy the same grid cell and crossfade;
             neither is ever unmounted, so there is no gap between them. */}
@@ -169,7 +169,7 @@ export function CategoryView({ slug, fit }: { slug: string; fit?: string }) {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                 {filtered.map((p, i) => (
                   <ProductCard
                     key={p.id}

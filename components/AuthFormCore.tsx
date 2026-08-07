@@ -4,6 +4,65 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 
+// Structural email shape check (RFC-5322-ish, simplified): local-part@label(.label)+
+// Requires at least one dot in the domain, so single-label hosts like "gmail", "test",
+// "xyz", or "localhost" are rejected outright.
+const EMAIL_SHAPE_REGEX =
+  /^(?!\.)(?!.*\.\.)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/;
+
+// Trusted TLD list (equivalent to the Public Suffix List's set of valid top-level domains).
+// A domain is only accepted if its final label is a real, publicly registered TLD.
+// This is what rejects things like "abc@gmail.iy" ("iy" is not an assigned TLD)
+// while still accepting real ccTLDs/gTLDs such as .com, .in, .co.uk, etc.
+const VALID_TLDS = new Set([
+  // Country-code TLDs (ISO 3166-1 based ccTLDs currently in use)
+  'ac','ad','ae','af','ag','ai','al','am','ao','aq','ar','as','at','au','aw','ax','az',
+  'ba','bb','bd','be','bf','bg','bh','bi','bj','bm','bn','bo','bq','br','bs','bt','bv','bw','by','bz',
+  'ca','cc','cd','cf','cg','ch','ci','ck','cl','cm','cn','co','cr','cu','cv','cw','cx','cy','cz',
+  'de','dj','dk','dm','do','dz',
+  'ec','ee','eg','eh','er','es','et','eu',
+  'fi','fj','fk','fm','fo','fr',
+  'ga','gb','gd','ge','gf','gg','gh','gi','gl','gm','gn','gp','gq','gr','gs','gt','gu','gw','gy',
+  'hk','hm','hn','hr','ht','hu',
+  'id','ie','il','im','in','io','iq','ir','is','it',
+  'je','jm','jo','jp',
+  'ke','kg','kh','ki','km','kn','kp','kr','kw','ky','kz',
+  'la','lb','lc','li','lk','lr','ls','lt','lu','lv','ly',
+  'ma','mc','md','me','mg','mh','mk','ml','mm','mn','mo','mp','mq','mr','ms','mt','mu','mv','mw','mx','my','mz',
+  'na','nc','ne','nf','ng','ni','nl','no','np','nr','nu','nz',
+  'om',
+  'pa','pe','pf','pg','ph','pk','pl','pm','pn','pr','ps','pt','pw','py',
+  'qa',
+  're','ro','rs','ru','rw',
+  'sa','sb','sc','sd','se','sg','sh','si','sj','sk','sl','sm','sn','so','sr','ss','st','su','sv','sx','sy','sz',
+  'tc','td','tf','tg','th','tj','tk','tl','tm','tn','to','tr','tt','tv','tw','tz',
+  'ua','ug','uk','us','uy','uz',
+  'va','vc','ve','vg','vi','vn','vu',
+  'wf','ws',
+  'ye','yt',
+  'za','zm','zw',
+  // Generic TLDs (gTLDs)
+  'com','org','net','edu','gov','mil','int','info','biz','name','pro','coop','museum',
+  'aero','jobs','mobi','travel','xxx','asia','cat','tel','post','xyz',
+  'online','site','tech','store','app','dev','cloud','digital','email','live','news','blog',
+  'shop','design','agency','solutions','expert','guru','life','world','today','network',
+  'company','group','systems','services','media','studio','team','work','zone','click','link',
+  'run','fund','capital','finance','market','ventures','holdings','industries','energy',
+  'construction','engineering','education','academy','institute','university','school',
+  'training','courses','science','software','computer',
+]);
+
+function isValidEmail(rawEmail: string): boolean {
+  const email = rawEmail.trim();
+  if (!email || email.length > 254 || !EMAIL_SHAPE_REGEX.test(email)) return false;
+
+  const domain = email.slice(email.lastIndexOf('@') + 1).toLowerCase();
+  const labels = domain.split('.');
+  const tld = labels[labels.length - 1];
+
+  return VALID_TLDS.has(tld);
+}
+
 export type AuthSuccessResult = {
   mode: 'login' | 'signup';
   name?: string;
@@ -57,6 +116,13 @@ export function AuthFormCore({
     const fd = new FormData(e.currentTarget);
     const email = (fd.get('email') as string).trim();
     const password = fd.get('password') as string;
+
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      isSubmittingRef.current = false;
+      return;
+    }
 
     try {
       if (mode === 'signup') {

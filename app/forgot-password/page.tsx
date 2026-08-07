@@ -1,15 +1,18 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading || isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setLoading(true); setError('');
     const fd = new FormData(e.currentTarget);
     const email = fd.get('email') as string;
@@ -18,8 +21,16 @@ export default function ForgotPasswordPage() {
       if (error) throw error;
       setSent(true);
     } catch (err: any) {
-      setError(err.message || 'Could not send reset link.');
-    } finally { setLoading(false); }
+      const message = err?.message || '';
+      if (message.toLowerCase().includes('rate limit exceeded')) {
+        setError('Too many requests. Please wait a few minutes before requesting another reset email.');
+      } else {
+        setError(message || 'Could not send reset link.');
+      }
+    } finally {
+      setLoading(false);
+      isSubmittingRef.current = false;
+    }
   }
 
   return (
@@ -35,7 +46,7 @@ export default function ForgotPasswordPage() {
               <form onSubmit={handleSubmit} className="text-left flex flex-col gap-4">
                 <div><label className="block font-oswald text-xs tracking-wider uppercase text-mute mb-2">Email</label><input required name="email" type="email" className="w-full border border-line bg-bg rounded-sm px-3 py-2.5 outline-none focus:border-camelDeep" /></div>
                 {error && <p className="text-error text-sm">{error}</p>}
-                <button disabled={loading} type="submit" className="w-full bg-ink text-bg py-3.5 rounded-sm font-oswald text-sm tracking-wider uppercase hover:bg-camelDeep transition-colors disabled:opacity-60">
+                <button disabled={loading || isSubmittingRef.current} type="submit" className="w-full bg-ink text-bg py-3.5 rounded-sm font-oswald text-sm tracking-wider uppercase hover:bg-camelDeep transition-colors disabled:opacity-60">
                   {loading ? 'Sending…' : 'Send Reset Link'}
                 </button>
               </form>

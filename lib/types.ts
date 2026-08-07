@@ -5,6 +5,7 @@ export type Product = {
   type: 'shirt' | 'trouser';
   fit_type: string | null;
   fit_slug: string | null;
+  fitCategory?: string | null;
   price: number;
   fabric: string | null;
   cut: string | null;
@@ -17,6 +18,66 @@ export type Product = {
   active: boolean;
   created_at?: string;
 };
+
+export type FitCategoryConfig = {
+  id: string;
+  name: string;
+  garmentType: 'shirt' | 'trouser';
+  relevantQuestions: Array<
+    'height_cm' | 'weight_kg' | 'age' | 'gender' | 'body_type' | 'chest' | 'shoulder' | 'neck' | 'current_waist' | 'current_trouser_length' | 'hip' | 'preferred_rise' | 'fit_preference' | 'current_fit_feedback'
+  >;
+  sizeChart: Array<{
+    size: string;
+    [measurement: string]: string | number;
+  }>;
+  weightBrackets: Array<{
+    minWeight: number;
+    maxWeight: number;
+    size: string;
+  }>;
+};
+
+export type BodyType = 'slim' | 'regular' | 'athletic' | 'heavy';
+export type Gender = 'male' | 'female' | 'unisex';
+export type PreferredRise = 'low' | 'mid' | 'high';
+export type FitPreference = 'extra_slim' | 'slim' | 'tailored' | 'regular' | 'relaxed';
+export type CurrentFitFeedback = 'too_tight' | 'perfect' | 'too_loose';
+
+export type FitProfile = {
+  height_cm: number;
+  weight_kg: number;
+  age: number;
+  gender: Gender;
+  body_type: BodyType;
+  chest?: number;
+  shoulder?: number;
+  neck?: number;
+  current_waist?: number;
+  current_trouser_length?: number;
+  hip?: number;
+  preferred_rise?: PreferredRise;
+  fit_preference?: FitPreference;
+  current_fit_feedback?: CurrentFitFeedback;
+};
+
+export type FitResult = {
+  garmentType: 'shirt' | 'trouser';
+  recommendedSize: string;
+  appliedSize: string;
+  isNearestAvailable: boolean;
+  fitCategory: string;
+  confidence: number;
+  explanation: string;
+  sizeSuggestion?: string;
+  // Shirt specific
+  shirtSize?: string;
+  // Trouser specific
+  trouserWaist?: string;
+  trouserLength?: string;
+  trouserFit?: string;
+};
+
+
 
 export type InventoryRow = {
   id: number;
@@ -255,3 +316,6 @@ export type ReturnRequest = {
   status: 'pending' | 'approved' | 'rejected' | 'completed';
   created_at: string;
 };
+
+
+

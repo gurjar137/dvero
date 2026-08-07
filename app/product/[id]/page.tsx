@@ -7,6 +7,7 @@ import { ProductImageZoom } from '@/components/ProductImageZoom';
 import { ShareModal } from '@/components/ShareModal';
 import { ProductReviews } from '@/components/ProductReviews';
 import { ProductPageSkeleton } from '@/components/ProductPageSkeleton';
+import { FindMyFitModal } from '@/components/FindMyFitModal';
 import { useCart } from '@/components/CartContext';
 import { useWishlist } from '@/components/WishlistContext';
 import { useRecentlyViewed } from '@/components/RecentlyViewedContext';
@@ -24,6 +25,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [openAcc, setOpenAcc] = useState<'details' | 'care' | 'shipping'>('details');
   const [shareOpen, setShareOpen] = useState(false);
+  const [fitModalOpen, setFitModalOpen] = useState(false);
 
   // Track Recently Viewed
   useEffect(() => {
@@ -173,6 +175,17 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 })}
               </div>
 
+              {/* Find My Fit Button */}
+              <div className="mt-2.5 mb-1.5">
+                <button
+                  type="button"
+                  onClick={() => setFitModalOpen(true)}
+                  className="font-oswald text-xs tracking-wider uppercase border border-line hover:border-ink px-3 py-1.5 rounded-sm bg-panel hover:bg-panel2 text-ink transition-colors inline-flex items-center gap-1.5 min-h-[36px]"
+                >
+                  <span>📏 Find My Fit</span>
+                </button>
+              </div>
+
               {/* Stock Indicator Feedback */}
               {size && (
                 <div className="text-xs font-oswald uppercase tracking-wider mt-2">
@@ -307,6 +320,15 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         title={product.name}
         isOpen={shareOpen}
         onClose={() => setShareOpen(false)}
+      />
+
+      {/* Find My Fit Modal */}
+      <FindMyFitModal
+        isOpen={fitModalOpen}
+        onClose={() => setFitModalOpen(false)}
+        product={product}
+        stockFor={stockFor}
+        onSelectSize={(recommendedSize) => setSize(recommendedSize)}
       />
     </main>
   );

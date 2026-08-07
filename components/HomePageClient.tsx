@@ -2,6 +2,7 @@
 import { useProducts } from '@/lib/useProducts';
 import { useSettings, SettingsProvider } from '@/lib/useSettings';
 import { Hero } from '@/components/Hero';
+import { ProductCard } from '@/components/ProductCard';
 import { BestSellerCard } from '@/components/BestSellerCard';
 import { ShopTheEdit } from '@/components/ShopTheEdit';
 import { HomepageGenericSection } from '@/components/HomepageGenericSection';
@@ -76,18 +77,22 @@ function FeaturesStrip() {
 }
 
 function FeaturedCollectionSection({ section, products, containerWidth }: { section: HomepageSection; products: Product[]; containerWidth: number }) {
+  const { stockFor } = useProducts();
   return (
-    <section id="drop01" style={{ backgroundColor: section.bg_color, color: section.text_color }} className="py-14 md:py-20 scroll-mt-20">
+    <section id="featured-collection" className="py-12 sm:py-16 md:py-24 scroll-mt-20 bg-[#FAF9F6]">
       <div className="mx-auto px-4 sm:px-6 md:px-14" style={{ maxWidth: containerWidth }}>
-        <div className="text-center mb-10 md:mb-14">
-          <div className="font-inter text-xs tracking-[0.2em] uppercase opacity-60 mb-2">{section.subtitle}</div>
-          <h2 className="font-playfair text-[1.7rem] sm:text-3xl md:text-[2.4rem] relative inline-block pb-3">
-            {section.title}
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-11 h-[2px]" style={{ backgroundColor: section.text_color }} />
+        <div className="text-center mb-10 sm:mb-14 md:mb-16">
+          <div className="font-inter text-xs tracking-[0.25em] uppercase text-[#666666] mb-2.5">
+            {section.subtitle || 'D\'VERO Edits'}
+          </div>
+          <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl text-[#111111] uppercase tracking-[0.15em] font-normal">
+            {section.title || 'Featured Collection'}
           </h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6">
-          {products.map((p, i) => <BestSellerCard key={p.id} product={p} mirror={i % 2 === 1} />)}
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          {products.map((p, i) => (
+            <ProductCard key={p.id} product={p} mirror={i % 2 === 1} stockFor={stockFor} />
+          ))}
         </div>
       </div>
     </section>
@@ -105,21 +110,36 @@ function HomePageContent({ initialProducts }: { initialProducts: Product[] }) {
     : DEFAULT_HOMEPAGE_SECTIONS
   ).filter(s => s.enabled).sort((a, b) => a.order - b.order);
 
+  const featuredSection = sections.find(s => s.id === 'featured_collection') || {
+    id: 'featured_collection',
+    title: 'Featured Collection',
+    subtitle: 'D\'VERO Edits',
+    enabled: true,
+    order: 2,
+  };
+
   return (
-    <main className="page-fade" style={{ backgroundColor: theme.bg_color }}>
+    <main className="page-fade bg-[#FAF9F6]">
+      {/* 1. Full-Height Cinematic Hero Banner */}
+      <Hero />
+
+      {/* 2. Immediate Featured Products Grid */}
+      <FeaturedCollectionSection
+        section={featuredSection as HomepageSection}
+        products={products}
+        containerWidth={theme.container_width}
+      />
+
+      {/* 3. Brand Promise Strip */}
+      <FeaturesStrip />
+
+      {/* 4. Optional Generic Sections (e.g. Instagram feed) */}
       {sections.map(section => {
-        if (section.id === 'hero') {
-          return <Hero key="hero" />;
-        }
-        if (section.id === 'shop_by_style') {
-          return <ShopTheEdit key="shop_by_style" />;
-        }
-        if (section.id === 'featured_collection') {
-          return <FeaturedCollectionSection key="featured_collection" section={section} products={products} containerWidth={theme.container_width} />;
+        if (section.id === 'hero' || section.id === 'shop_by_style' || section.id === 'featured_collection') {
+          return null; // Skip category showcase & redundant hero
         }
         return <HomepageGenericSection key={section.id} section={section} theme={theme} />;
       })}
-      <FeaturesStrip />
     </main>
   );
 }

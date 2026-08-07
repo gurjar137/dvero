@@ -24,9 +24,9 @@ export function CollectionSkeleton() {
         <Bone className="h-9 w-32 rounded-sm" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
         {[0, 1, 2, 3].map(i => (
-          <Bone key={i} className="h-[520px] w-full rounded-2xl" />
+          <Bone key={i} className="aspect-[3/4] w-full rounded-[12px]" />
         ))}
       </div>
     </>

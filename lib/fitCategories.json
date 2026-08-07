@@ -1,0 +1,214 @@
+{
+  "categories": {
+    "slim": {
+      "id": "slim",
+      "name": "Slim Fit Shirt",
+      "garmentType": "shirt",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "chest", "shoulder", "fit_preference", "current_fit_feedback"],
+      "sizeChart": [
+        { "size": "S", "chest": "38 - 39", "shoulder": "17.5", "sleeve": "25.0", "length": "29.0" },
+        { "size": "M", "chest": "40 - 41", "shoulder": "18.0", "sleeve": "25.5", "length": "29.5" },
+        { "size": "L", "chest": "42 - 43", "shoulder": "18.7", "sleeve": "26.0", "length": "30.5" },
+        { "size": "XL", "chest": "44 - 45", "shoulder": "19.5", "sleeve": "26.5", "length": "31.0" },
+        { "size": "XXL", "chest": "46 - 47", "shoulder": "20.2", "sleeve": "27.0", "length": "31.5" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 62, "size": "S" },
+        { "minWeight": 60, "maxWeight": 72, "size": "M" },
+        { "minWeight": 70, "maxWeight": 83, "size": "L" },
+        { "minWeight": 81, "maxWeight": 94, "size": "XL" },
+        { "minWeight": 92, "maxWeight": 150, "size": "XXL" }
+      ]
+    },
+    "regular": {
+      "id": "regular",
+      "name": "Regular Fit Shirt",
+      "garmentType": "shirt",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "chest", "shoulder", "fit_preference", "current_fit_feedback"],
+      "sizeChart": [
+        { "size": "S", "chest": "40 - 41", "shoulder": "18.0", "sleeve": "25.0", "length": "29.5" },
+        { "size": "M", "chest": "42 - 43", "shoulder": "18.5", "sleeve": "25.5", "length": "30.0" },
+        { "size": "L", "chest": "44 - 45", "shoulder": "19.2", "sleeve": "26.0", "length": "31.0" },
+        { "size": "XL", "chest": "46 - 47", "shoulder": "20.0", "sleeve": "26.5", "length": "31.5" },
+        { "size": "XXL", "chest": "48 - 49", "shoulder": "20.7", "sleeve": "27.0", "length": "32.0" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 64, "size": "S" },
+        { "minWeight": 62, "maxWeight": 75, "size": "M" },
+        { "minWeight": 73, "maxWeight": 86, "size": "L" },
+        { "minWeight": 84, "maxWeight": 97, "size": "XL" },
+        { "minWeight": 95, "maxWeight": 150, "size": "XXL" }
+      ]
+    },
+    "tailored": {
+      "id": "tailored",
+      "name": "Tailored Fit Shirt",
+      "garmentType": "shirt",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "chest", "shoulder", "neck", "fit_preference", "current_fit_feedback"],
+      "sizeChart": [
+        { "size": "S", "chest": "39 - 40", "shoulder": "17.7", "sleeve": "25.0", "length": "29.0" },
+        { "size": "M", "chest": "41 - 42", "shoulder": "18.2", "sleeve": "25.5", "length": "30.0" },
+        { "size": "L", "chest": "43 - 44", "shoulder": "19.0", "sleeve": "26.0", "length": "31.0" },
+        { "size": "XL", "chest": "45 - 46", "shoulder": "19.7", "sleeve": "26.5", "length": "31.5" },
+        { "size": "XXL", "chest": "47 - 48", "shoulder": "20.5", "sleeve": "27.0", "length": "32.0" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 63, "size": "S" },
+        { "minWeight": 61, "maxWeight": 74, "size": "M" },
+        { "minWeight": 72, "maxWeight": 85, "size": "L" },
+        { "minWeight": 83, "maxWeight": 95, "size": "XL" },
+        { "minWeight": 93, "maxWeight": 150, "size": "XXL" }
+      ]
+    },
+    "relaxed": {
+      "id": "relaxed",
+      "name": "Relaxed Fit Shirt",
+      "garmentType": "shirt",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "chest", "shoulder", "fit_preference"],
+      "sizeChart": [
+        { "size": "S", "chest": "42 - 43", "shoulder": "18.5", "sleeve": "25.5", "length": "30.0" },
+        { "size": "M", "chest": "44 - 45", "shoulder": "19.0", "sleeve": "26.0", "length": "30.5" },
+        { "size": "L", "chest": "46 - 47", "shoulder": "19.7", "sleeve": "26.5", "length": "31.5" },
+        { "size": "XL", "chest": "48 - 49", "shoulder": "20.5", "sleeve": "27.0", "length": "32.0" },
+        { "size": "XXL", "chest": "50 - 51", "shoulder": "21.2", "sleeve": "27.5", "length": "32.5" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 66, "size": "S" },
+        { "minWeight": 64, "maxWeight": 78, "size": "M" },
+        { "minWeight": 76, "maxWeight": 90, "size": "L" },
+        { "minWeight": 88, "maxWeight": 102, "size": "XL" },
+        { "minWeight": 100, "maxWeight": 150, "size": "XXL" }
+      ]
+    },
+    "oversized": {
+      "id": "oversized",
+      "name": "Oversized Fit Shirt",
+      "garmentType": "shirt",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "chest", "fit_preference"],
+      "sizeChart": [
+        { "size": "S", "chest": "44 - 45", "shoulder": "19.5", "sleeve": "26.0", "length": "31.0" },
+        { "size": "M", "chest": "46 - 47", "shoulder": "20.0", "sleeve": "26.5", "length": "31.5" },
+        { "size": "L", "chest": "48 - 49", "shoulder": "20.7", "sleeve": "27.0", "length": "32.5" },
+        { "size": "XL", "chest": "50 - 51", "shoulder": "21.5", "sleeve": "27.5", "length": "33.0" },
+        { "size": "XXL", "chest": "52 - 53", "shoulder": "22.2", "sleeve": "28.0", "length": "33.5" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 68, "size": "S" },
+        { "minWeight": 66, "maxWeight": 80, "size": "M" },
+        { "minWeight": 78, "maxWeight": 94, "size": "L" },
+        { "minWeight": 92, "maxWeight": 106, "size": "XL" },
+        { "minWeight": 104, "maxWeight": 150, "size": "XXL" }
+      ]
+    },
+    "straight": {
+      "id": "straight",
+      "name": "Straight Fit Trouser",
+      "garmentType": "trouser",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "current_waist", "current_trouser_length", "hip", "preferred_rise", "fit_preference", "current_fit_feedback"],
+      "sizeChart": [
+        { "size": "28", "waist": "28.0", "hip": "37.0", "thigh": "21.0", "rise": "10.5" },
+        { "size": "30", "waist": "30.0", "hip": "39.0", "thigh": "22.5", "rise": "11.0" },
+        { "size": "32", "waist": "32.0", "hip": "41.0", "thigh": "24.0", "rise": "11.2" },
+        { "size": "34", "waist": "34.0", "hip": "43.0", "thigh": "25.5", "rise": "11.5" },
+        { "size": "36", "waist": "36.0", "hip": "45.0", "thigh": "27.0", "rise": "12.0" },
+        { "size": "38", "waist": "38.0", "hip": "47.0", "thigh": "28.5", "rise": "12.5" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 58, "size": "28" },
+        { "minWeight": 57, "maxWeight": 66, "size": "30" },
+        { "minWeight": 65, "maxWeight": 75, "size": "32" },
+        { "minWeight": 74, "maxWeight": 84, "size": "34" },
+        { "minWeight": 83, "maxWeight": 93, "size": "36" },
+        { "minWeight": 92, "maxWeight": 150, "size": "38" }
+      ]
+    },
+    "bootcut": {
+      "id": "bootcut",
+      "name": "Boot Cut Trouser",
+      "garmentType": "trouser",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "current_waist", "current_trouser_length", "hip", "preferred_rise", "fit_preference", "current_fit_feedback"],
+      "sizeChart": [
+        { "size": "28", "waist": "28.0", "hip": "37.5", "thigh": "21.5", "knee": "16.5", "hem": "18.5" },
+        { "size": "30", "waist": "30.0", "hip": "39.5", "thigh": "23.0", "knee": "17.5", "hem": "19.5" },
+        { "size": "32", "waist": "32.0", "hip": "41.5", "thigh": "24.5", "knee": "18.5", "hem": "20.5" },
+        { "size": "34", "waist": "34.0", "hip": "43.5", "thigh": "26.0", "knee": "19.5", "hem": "21.5" },
+        { "size": "36", "waist": "36.0", "hip": "45.5", "thigh": "27.5", "knee": "20.5", "hem": "22.5" },
+        { "size": "38", "waist": "38.0", "hip": "47.5", "thigh": "29.0", "knee": "21.5", "hem": "23.5" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 58, "size": "28" },
+        { "minWeight": 57, "maxWeight": 66, "size": "30" },
+        { "minWeight": 65, "maxWeight": 75, "size": "32" },
+        { "minWeight": 74, "maxWeight": 84, "size": "34" },
+        { "minWeight": 83, "maxWeight": 93, "size": "36" },
+        { "minWeight": 92, "maxWeight": 150, "size": "38" }
+      ]
+    },
+    "baggy": {
+      "id": "baggy",
+      "name": "Baggy Fit Trouser",
+      "garmentType": "trouser",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "current_waist", "current_trouser_length", "hip", "preferred_rise", "fit_preference"],
+      "sizeChart": [
+        { "size": "28", "waist": "28.5", "hip": "39.0", "thigh": "23.5", "hem": "20.0" },
+        { "size": "30", "waist": "30.5", "hip": "41.0", "thigh": "25.0", "hem": "21.0" },
+        { "size": "32", "waist": "32.5", "hip": "43.0", "thigh": "26.5", "hem": "22.0" },
+        { "size": "34", "waist": "34.5", "hip": "45.0", "thigh": "28.0", "hem": "23.0" },
+        { "size": "36", "waist": "36.5", "hip": "47.0", "thigh": "29.5", "hem": "24.0" },
+        { "size": "38", "waist": "38.5", "hip": "49.0", "thigh": "31.0", "hem": "25.0" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 60, "size": "28" },
+        { "minWeight": 59, "maxWeight": 68, "size": "30" },
+        { "minWeight": 67, "maxWeight": 78, "size": "32" },
+        { "minWeight": 77, "maxWeight": 88, "size": "34" },
+        { "minWeight": 87, "maxWeight": 98, "size": "36" },
+        { "minWeight": 97, "maxWeight": 150, "size": "38" }
+      ]
+    },
+    "pleated": {
+      "id": "pleated",
+      "name": "Pleated Trouser",
+      "garmentType": "trouser",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "current_waist", "current_trouser_length", "hip", "preferred_rise", "fit_preference"],
+      "sizeChart": [
+        { "size": "28", "waist": "28.0", "hip": "38.5", "thigh": "22.5", "rise": "11.5" },
+        { "size": "30", "waist": "30.0", "hip": "40.5", "thigh": "24.0", "rise": "12.0" },
+        { "size": "32", "waist": "32.0", "hip": "42.5", "thigh": "25.5", "rise": "12.2" },
+        { "size": "34", "waist": "34.0", "hip": "44.5", "thigh": "27.0", "rise": "12.5" },
+        { "size": "36", "waist": "36.0", "hip": "46.5", "thigh": "28.5", "rise": "13.0" },
+        { "size": "38", "waist": "38.0", "hip": "48.5", "thigh": "30.0", "rise": "13.5" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 58, "size": "28" },
+        { "minWeight": 57, "maxWeight": 66, "size": "30" },
+        { "minWeight": 65, "maxWeight": 75, "size": "32" },
+        { "minWeight": 74, "maxWeight": 84, "size": "34" },
+        { "minWeight": 83, "maxWeight": 93, "size": "36" },
+        { "minWeight": 92, "maxWeight": 150, "size": "38" }
+      ]
+    },
+    "office-fit": {
+      "id": "office-fit",
+      "name": "Office Fit Trouser",
+      "garmentType": "trouser",
+      "relevantQuestions": ["height_cm", "weight_kg", "age", "gender", "body_type", "current_waist", "current_trouser_length", "hip", "preferred_rise", "fit_preference", "current_fit_feedback"],
+      "sizeChart": [
+        { "size": "28", "waist": "28.0", "hip": "37.0", "thigh": "21.5", "rise": "11.0" },
+        { "size": "30", "waist": "30.0", "hip": "39.0", "thigh": "23.0", "rise": "11.2" },
+        { "size": "32", "waist": "32.0", "hip": "41.0", "thigh": "24.5", "rise": "11.5" },
+        { "size": "34", "waist": "34.0", "hip": "43.0", "thigh": "26.0", "rise": "12.0" },
+        { "size": "36", "waist": "36.0", "hip": "45.0", "thigh": "27.5", "rise": "12.2" },
+        { "size": "38", "waist": "38.0", "hip": "47.0", "thigh": "29.0", "rise": "12.5" }
+      ],
+      "weightBrackets": [
+        { "minWeight": 0, "maxWeight": 58, "size": "28" },
+        { "minWeight": 57, "maxWeight": 66, "size": "30" },
+        { "minWeight": 65, "maxWeight": 75, "size": "32" },
+        { "minWeight": 74, "maxWeight": 84, "size": "34" },
+        { "minWeight": 83, "maxWeight": 93, "size": "36" },
+        { "minWeight": 92, "maxWeight": 150, "size": "38" }
+      ]
+    }
+  }
+}

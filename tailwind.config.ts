@@ -8,16 +8,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: '#FFFFFF',
-        panel: '#F4F2EC',
-        panel2: '#E9E4D8',
-        camel: '#A8987C',
-        camelDeep: '#6B6459',
-        ink: '#141210',
-        mute: '#8A8175',
-        line: '#E4E0D8',
-        success: '#3F6B45',
-        error: '#9B3A3A'
+        bg: '#FAF9F6',
+        panel: '#F4F3EE',
+        panel2: '#ECEAE4',
+        camel: '#111111',
+        camelDeep: '#111111',
+        ink: '#111111',
+        mute: '#666666',
+        line: '#EAEAEA',
+        success: '#2E5B37',
+        error: '#8C2B2B'
       },
       fontFamily: {
         oswald: ['var(--font-oswald)'],
@@ -26,9 +26,9 @@ const config: Config = {
         playfair: ['var(--font-playfair)']
       },
       boxShadow: {
-        sm2: '0 2px 14px rgba(29,26,21,0.07)',
-        md2: '0 12px 32px rgba(29,26,21,0.10)',
-        lg2: '0 26px 60px rgba(29,26,21,0.16)'
+        sm2: '0 2px 8px rgba(0,0,0,0.04)',
+        md2: '0 8px 24px rgba(0,0,0,0.06)',
+        lg2: '0 16px 40px rgba(0,0,0,0.08)'
       }
     }
   },

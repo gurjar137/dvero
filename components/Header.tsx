@@ -28,8 +28,22 @@ export function Header() {
   const [authToast, setAuthToast] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  // Scroll listener for sticky transparent-to-solid transition
+  useEffect(() => {
+    function handleScroll() {
+      if (window.scrollY > 40) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    }
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Debounce search query by 300ms
   useEffect(() => {
@@ -72,36 +86,42 @@ export function Header() {
       )
     : [];
 
+  const isTransparent = pathname === '/' && !isScrolled;
+
   return (
     <>
-      {/* Announcement Bar */}
-      <div className="bg-ink text-bg text-center py-2.5 px-3 sm:px-4 font-inter text-[0.62rem] md:text-[0.7rem] tracking-[0.14em] sm:tracking-[0.16em] md:tracking-[0.2em] uppercase truncate">
-        {settings.announcement_text}
-      </div>
-
-      <header className="sticky top-0 z-40 bg-bg/95 backdrop-blur-md border-b border-line">
-        {/* 3-Section Non-Overlapping Layout Architecture */}
-        <nav className="flex items-center justify-between px-2 sm:px-6 md:px-14 py-2.5 sm:py-3 md:py-4.5 max-w-[1440px] mx-auto min-h-[56px] sm:min-h-[64px] md:min-h-[68px] w-full">
+      <header
+        className={`transition-all duration-300 ease-in-out ${
+          isTransparent
+            ? 'absolute top-0 left-0 right-0 z-40 bg-transparent text-white border-b border-transparent shadow-none backdrop-blur-none'
+            : 'fixed top-0 left-0 right-0 z-40 bg-[#FAF9F6] text-[#111111] border-b border-[#EAEAEA] shadow-sm backdrop-blur-md'
+        }`}
+      >
+        <nav className="flex items-center justify-between px-4 sm:px-8 md:px-14 py-4 max-w-[1440px] mx-auto min-h-[64px] w-full">
           
-          {/* SECTION 1 — LEFT CONTROLS: Menu + Search (In Flex Flow) */}
-          <div className="flex items-center justify-start gap-0.5 sm:gap-1 shrink-0">
+          {/* LEFT: Menu Links (Desktop) / Hamburger (Mobile) */}
+          <div className="flex items-center justify-start gap-6 w-1/3">
             <button
               onClick={() => setMobileOpen(true)}
               aria-label="Open Mobile Menu"
-              className="md:hidden w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-ink hover:text-camelDeep transition-colors"
+              className="md:hidden p-1 hover:opacity-60 transition-opacity"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-                <path d="M4 6h16M4 12h16M4 18h16" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} className="w-5 h-5">
+                <path d="M3 7h18M3 12h18M3 17h18" strokeLinecap="round" />
               </svg>
             </button>
 
-            <ul className="hidden md:flex items-center gap-9">
+            <ul className="hidden md:flex items-center gap-8">
               {navLinks.map(l => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className={`font-inter text-[0.78rem] tracking-[0.1em] uppercase flex items-center gap-1.5 hover:text-camelDeep transition-colors ${
-                      pathname === l.href ? 'text-camelDeep' : 'text-ink'
+                    className={`font-inter text-xs tracking-[0.15em] uppercase hover:opacity-60 transition-opacity ${
+                      pathname === l.href
+                        ? 'font-medium'
+                        : isTransparent
+                        ? 'text-white/80'
+                        : 'text-[#666666]'
                     }`}
                   >
                     {l.label}
@@ -109,41 +129,59 @@ export function Header() {
                 </li>
               ))}
             </ul>
-
-            <button
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search"
-              className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-ink hover:text-camelDeep transition-colors"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-            </button>
           </div>
 
-          {/* SECTION 2 — CENTER LOGO: Guaranteed Non-Overlapping In Flex Flow */}
-          <div className="flex-1 flex justify-center items-center px-1 min-w-0">
+          {/* CENTER LOGO */}
+          <div className="flex justify-center items-center w-1/3">
             <Link
               href="/"
-              className="font-playfair text-center text-lg sm:text-2xl md:text-[1.7rem] tracking-[0.22em] sm:tracking-[0.32em] whitespace-nowrap hover:text-camelDeep transition-colors select-none text-ink shrink-0"
+              className={`font-playfair text-xl sm:text-2xl tracking-[0.3em] uppercase hover:opacity-75 transition-opacity select-none ${
+                isTransparent ? 'text-white' : 'text-[#111111]'
+              }`}
             >
               D'VERO
             </Link>
           </div>
 
-          {/* SECTION 3 — RIGHT CONTROLS: Wishlist, Cart, Account (In Flex Flow) */}
-          <div className="flex items-center justify-end gap-0.5 sm:gap-1 shrink-0 relative">
+          {/* RIGHT ICONS: Search, Account, Wishlist, Cart */}
+          <div className="flex items-center justify-end gap-4 sm:gap-6 w-1/3 relative">
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search"
+              className="p-1 hover:opacity-60 transition-opacity"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} className="w-5 h-5">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            <button
+              onClick={handleAccountClick}
+              aria-label="Account Profile"
+              className="hidden md:flex p-1 hover:opacity-60 transition-opacity relative"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} className="w-5 h-5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              {session && (
+                <span className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-current" />
+              )}
+            </button>
+
             <Link
               href="/wishlist"
               aria-label="Wishlist"
-              className="relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-ink hover:text-camelDeep transition-colors"
+              className="hidden md:flex relative p-1 hover:opacity-60 transition-opacity"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} className="w-5 h-5">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
               {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 bg-camel text-ink text-[0.55rem] leading-none rounded-full w-3.5 h-3.5 flex items-center justify-center font-mono font-bold">
+                <span className={`absolute -top-1 -right-1 text-[0.55rem] rounded-full w-3.5 h-3.5 flex items-center justify-center font-mono ${
+                  isTransparent ? 'bg-white text-[#111111]' : 'bg-[#111111] text-[#FAF9F6]'
+                }`}>
                   {wishlistCount}
                 </span>
               )}
@@ -152,70 +190,49 @@ export function Header() {
             <button
               onClick={() => setCartDrawerOpen(true)}
               aria-label="Open cart drawer"
-              className="relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-ink hover:text-camelDeep transition-colors"
+              className="relative p-1 hover:opacity-60 transition-opacity"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
-                <path d="M6 8h12l1 13H5L6 8Z" />
-                <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} className="w-5 h-5">
+                <path d="M6 7h12l1 14H5L6 7Z" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 7V5a3 3 0 0 1 6 0v2" strokeLinecap="round" />
               </svg>
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-ink text-bg text-[0.55rem] leading-none rounded-full w-3.5 h-3.5 flex items-center justify-center font-mono font-bold">
+                <span className={`absolute -top-1 -right-1 text-[0.55rem] rounded-full w-3.5 h-3.5 flex items-center justify-center font-mono ${
+                  isTransparent ? 'bg-white text-[#111111]' : 'bg-[#111111] text-[#FAF9F6]'
+                }`}>
                   {cartCount}
                 </span>
-              )}
-            </button>
-
-            {/* SINGLE UNIVERSAL ACCOUNT ICON */}
-            <button
-              onClick={handleAccountClick}
-              aria-label="Account Profile"
-              className="relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-ink hover:text-camelDeep transition-colors"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              {session && (
-                <span className="absolute bottom-1.5 right-1.5 w-2 h-2 rounded-full bg-success ring-2 ring-bg" />
               )}
             </button>
 
             {/* Logged-In Luxury Account Popover Dropdown */}
             {session && accountMenuOpen && (
               <div
-                className="absolute right-0 top-12 z-50 w-56 bg-bg border border-line rounded-lg shadow-2xl p-3 animate-fadeIn space-y-1 font-oswald text-xs uppercase tracking-wider"
+                className="absolute right-0 top-10 z-50 w-56 bg-[#FAF9F6] border border-[#EAEAEA] rounded-md shadow-lg p-3 animate-fadeIn space-y-1 font-inter text-xs tracking-wider"
                 onMouseLeave={() => setAccountMenuOpen(false)}
               >
-                <div className="px-3 py-2 border-b border-line mb-1">
-                  <div className="text-[0.65rem] text-mute">Signed in as</div>
-                  <div className="font-mono text-ink text-[0.7rem] truncate lowercase">{session.user.email}</div>
+                <div className="px-3 py-2 border-b border-[#EAEAEA] mb-1">
+                  <div className="text-[0.65rem] text-[#666666] uppercase">Signed in as</div>
+                  <div className="font-mono text-[#111111] text-[0.7rem] truncate lowercase">{session.user.email}</div>
                 </div>
 
                 <Link
                   href="/profile"
                   onClick={() => setAccountMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded hover:bg-panel hover:text-camelDeep transition-colors"
+                  className="block px-3 py-2 rounded hover:bg-[#ECEAE4] transition-colors"
                 >
                   My Profile & Orders
                 </Link>
                 <Link
                   href="/wishlist"
                   onClick={() => setAccountMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded hover:bg-panel hover:text-camelDeep transition-colors"
+                  className="block px-3 py-2 rounded hover:bg-[#ECEAE4] transition-colors"
                 >
                   Wishlist ({wishlistCount})
                 </Link>
-                <Link
-                  href="/profile"
-                  onClick={() => setAccountMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded hover:bg-panel hover:text-camelDeep transition-colors"
-                >
-                  Saved Addresses
-                </Link>
-
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-3 py-2.5 rounded hover:bg-error/10 text-error transition-colors border-t border-line mt-1"
+                  className="w-full text-left px-3 py-2 rounded hover:bg-[#ECEAE4] text-[#111111] transition-colors border-t border-[#EAEAEA] mt-1"
                 >
                   Sign Out
                 </button>
@@ -240,37 +257,81 @@ export function Header() {
 
       {/* Luxury Mobile Navigation Drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-ink/80 backdrop-blur-md flex animate-fadeIn">
-          <div className="w-4/5 max-w-sm bg-bg h-full p-6 flex flex-col justify-between border-r border-line shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-[#111111]/80 backdrop-blur-md flex animate-fadeIn">
+          <div className="w-4/5 max-w-sm bg-[#FAF9F6] h-full p-6 flex flex-col justify-between border-r border-[#EAEAEA] shadow-2xl">
             <div>
-              <div className="flex justify-between items-center pb-6 border-b border-line mb-6">
-                <span className="font-playfair text-lg tracking-[0.2em]">D'VERO</span>
+              <div className="flex justify-between items-center pb-6 border-b border-[#EAEAEA] mb-6">
+                <span className="font-playfair text-xl tracking-[0.25em] text-[#111111] uppercase">D'VERO</span>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center font-oswald text-sm uppercase text-mute hover:text-ink"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center font-inter text-sm uppercase text-[#666666] hover:text-[#111111]"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="flex flex-col space-y-4">
-                {navLinks.map(l => (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="font-oswald text-base tracking-wider uppercase py-2 border-b border-line/50 hover:text-camelDeep transition-colors"
-                  >
-                    {l.label}
-                  </Link>
-                ))}
+              <div className="flex flex-col space-y-3">
+                <Link
+                  href="/"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity"
+                >
+                  Shop
+                </Link>
+                <Link
+                  href="/category/shirts"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity"
+                >
+                  Shirts
+                </Link>
+                <Link
+                  href="/category/trousers"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity"
+                >
+                  Trousers
+                </Link>
+                <Link
+                  href="/about"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity"
+                >
+                  About
+                </Link>
+                <Link
+                  href="#featured-collection"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity"
+                >
+                  New Arrivals
+                </Link>
+                <Link
+                  href={session ? "/profile" : "#"}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (!session) setAuthModalOpen(true);
+                  }}
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity"
+                >
+                  {session ? "My Account" : "Login / Sign Up"}
+                </Link>
                 <Link
                   href="/wishlist"
                   onClick={() => setMobileOpen(false)}
-                  className="font-oswald text-base tracking-wider uppercase py-2 border-b border-line/50 hover:text-camelDeep transition-colors flex justify-between items-center"
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity flex justify-between items-center"
                 >
                   <span>Wishlist</span>
-                  <span className="bg-camel text-ink text-xs px-2 py-0.5 rounded-full font-mono">{wishlistCount}</span>
+                  {wishlistCount > 0 && (
+                    <span className="bg-[#111111] text-[#FAF9F6] text-xs px-2 py-0.5 rounded-full font-mono">{wishlistCount}</span>
+                  )}
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-inter text-sm tracking-[0.15em] uppercase py-2.5 border-b border-[#EAEAEA]/60 text-[#111111] hover:opacity-60 transition-opacity"
+                >
+                  Contact
                 </Link>
               </div>
             </div>

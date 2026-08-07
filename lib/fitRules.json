@@ -1,0 +1,50 @@
+{
+  "shirtRules": [
+    { "minWeight": 0, "maxWeight": 62, "minHeight": 0, "maxHeight": 172, "size": "S" },
+    { "minWeight": 60, "maxWeight": 72, "minHeight": 168, "maxHeight": 178, "size": "M" },
+    { "minWeight": 70, "maxWeight": 83, "minHeight": 173, "maxHeight": 184, "size": "L" },
+    { "minWeight": 81, "maxWeight": 94, "minHeight": 178, "maxHeight": 190, "size": "XL" },
+    { "minWeight": 92, "maxWeight": 150, "minHeight": 180, "maxHeight": 220, "size": "XXL" }
+  ],
+  "chestToShirtSize": [
+    { "maxChestInches": 37, "size": "S" },
+    { "maxChestInches": 40, "size": "M" },
+    { "maxChestInches": 43, "size": "L" },
+    { "maxChestInches": 46, "size": "XL" },
+    { "maxChestInches": 60, "size": "XXL" }
+  ],
+  "trouserWaistRules": [
+    { "minWeight": 0, "maxWeight": 58, "waist": "28" },
+    { "minWeight": 57, "maxWeight": 66, "waist": "30" },
+    { "minWeight": 65, "maxWeight": 75, "waist": "32" },
+    { "minWeight": 74, "maxWeight": 84, "waist": "34" },
+    { "minWeight": 83, "maxWeight": 93, "waist": "36" },
+    { "minWeight": 92, "maxWeight": 150, "waist": "38" }
+  ],
+  "bodyTypeAdjustments": {
+    "slim": { "shirtOffset": -1, "waistOffset": 0 },
+    "regular": { "shirtOffset": 0, "waistOffset": 0 },
+    "athletic": { "shirtOffset": 0, "waistOffset": 0 },
+    "heavy": { "shirtOffset": 1, "waistOffset": 1 }
+  },
+  "fitPreferenceOffsets": {
+    "extra_slim": -1,
+    "slim": 0,
+    "tailored": 0,
+    "regular": 0,
+    "relaxed": 1
+  },
+  "feedbackOffsets": {
+    "too_tight": 1,
+    "perfect": 0,
+    "too_loose": -1
+  },
+  "trouserFitRules": {
+    "slim": "Straight Fit",
+    "regular": "Office Fit",
+    "athletic": "Tailored Straight",
+    "heavy": "Baggy Fit"
+  },
+  "sizeOrder": ["S", "M", "L", "XL", "XXL"],
+  "waistOrder": ["28", "30", "32", "34", "36", "38"]
+}

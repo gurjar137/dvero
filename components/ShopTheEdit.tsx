@@ -175,7 +175,7 @@ function NewArrivalsTile({ banner }: { banner: PromoBanner }) {
   return (
     <Link
       href={banner.button_link || NEW_ARRIVALS_TILE.href}
-      className={`group relative flex flex-col overflow-hidden min-h-[210px] lg:min-h-0 lg:col-span-2 lg:row-start-3 p-8 md:p-11 bg-panel text-ink ${JUSTIFY[banner.vertical_position]}`}
+      className={`group relative flex flex-col overflow-hidden min-h-[210px] lg:min-h-0 lg:col-span-2 lg:row-start-3 p-8 md:p-11 bg-panel text-ink rounded-[12px] ${JUSTIFY[banner.vertical_position]}`}
     >
       <TileImage tile={NEW_ARRIVALS_TILE} banner={banner} alt={banner.title} />
       <TileOverlay banner={banner} />
@@ -200,20 +200,19 @@ export function ShopTheEdit() {
   const banners = { ...DEFAULT_PROMO_BANNERS, ...(settings.promo_banners || {}) };
 
   return (
-    <section className="py-14 md:py-20 bg-bg">
+    <section className="py-12 sm:py-16 md:py-24 bg-[#FAF9F6]">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 md:px-14">
-        <div className="text-center mb-10 md:mb-14">
-          <div className="font-inter text-[0.7rem] tracking-[0.2em] uppercase text-mute mb-2">Shop By Style</div>
-          <h2 className="font-playfair text-[1.7rem] sm:text-3xl md:text-[2.4rem] relative inline-block pb-3">
-            Discover The Collection
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-11 h-[2px] bg-ink" />
+        <div className="text-center mb-10 sm:mb-14">
+          <div className="font-inter text-xs tracking-[0.25em] uppercase text-[#666666] mb-2">Shop By Style</div>
+          <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl text-[#111111] uppercase tracking-[0.15em] font-normal">
+            Collections
           </h2>
         </div>
 
-        <div className="grid gap-[2px] bg-line lg:grid-cols-2 lg:grid-rows-[260px_260px_300px] lg:auto-rows-[260px]">
-          <BentoTile tile={MENS_COLLECTION} banner={banners.mens_collection} dark className="lg:col-start-1 lg:row-start-1 lg:row-span-2" />
-          <BentoTile tile={SHIRTS_TILE} banner={banners.shirts} className="lg:col-start-2 lg:row-start-1" />
-          <BentoTile tile={TROUSERS_TILE} banner={banners.trousers} className="lg:col-start-2 lg:row-start-2" />
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 lg:grid-rows-[280px_280px_240px] lg:auto-rows-[280px]">
+          <BentoTile tile={MENS_COLLECTION} banner={banners.mens_collection} dark className="rounded-[12px] lg:col-start-1 lg:row-start-1 lg:row-span-2" />
+          <BentoTile tile={SHIRTS_TILE} banner={banners.shirts} className="rounded-[12px] lg:col-start-2 lg:row-start-1" />
+          <BentoTile tile={TROUSERS_TILE} banner={banners.trousers} className="rounded-[12px] lg:col-start-2 lg:row-start-2" />
           <NewArrivalsTile banner={banners.new_arrivals} />
         </div>
       </div>
