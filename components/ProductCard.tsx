@@ -42,15 +42,22 @@ export function ProductCard({
     toggleWishlist(product.id);
   }
 
+  const [isAdding, setIsAdding] = useState(false);
+
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (isAdding) return;
     const firstAvailable = product.sizes.find(s => stockFor(product.id, s) > 0) || product.sizes[0];
     if (stockFor(product.id, firstAvailable) <= 0) return;
+    setIsAdding(true);
     addToCart(product.id, firstAvailable, 1);
     setAdded(true);
     setCartDrawerOpen(true);
-    setTimeout(() => setAdded(false), 1200);
+    setTimeout(() => {
+      setAdded(false);
+      setIsAdding(false);
+    }, 1200);
   }
 
   return (

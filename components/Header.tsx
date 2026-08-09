@@ -33,6 +33,36 @@ export function Header() {
   const router = useRouter();
   const headerRef = useRef<HTMLElement>(null);
 
+  const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
+  const accountContainerRef = useRef<HTMLDivElement>(null);
+
+  // Click/Touch outside & ESC key listener for Account Dropdown & Mobile Drawer
+  useEffect(() => {
+    function handleOutsidePointer(e: PointerEvent) {
+      if (
+        accountContainerRef.current &&
+        !accountContainerRef.current.contains(e.target as Node)
+      ) {
+        setAccountMenuOpen(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setAccountMenuOpen(false);
+        setAccountDrawerOpen(false);
+      }
+    }
+
+    if (accountMenuOpen || accountDrawerOpen) {
+      document.addEventListener('pointerdown', handleOutsidePointer);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsidePointer);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [accountMenuOpen, accountDrawerOpen]);
+
   // Dynamically measure navbar height and set CSS variable --navbar-height
   useEffect(() => {
     if (!headerRef.current) return;
@@ -82,6 +112,26 @@ export function Header() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  // Clean up all header drawers/overlays on route navigation
+  useEffect(() => {
+    setMobileOpen(false);
+    setSearchOpen(false);
+    setAccountMenuOpen(false);
+    setAccountDrawerOpen(false);
+  }, [pathname]);
+
+  // Manage body scroll locking for header drawers
+  useEffect(() => {
+    if (mobileOpen || searchOpen || accountDrawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen, searchOpen, accountDrawerOpen]);
+
   const navLinks = [
     { href: '/', label: 'Shop' },
     { href: '/category/shirts', label: 'Shirts' },
@@ -93,12 +143,17 @@ export function Header() {
     await supabase.auth.signOut();
     setMobileOpen(false);
     setAccountMenuOpen(false);
+    setAccountDrawerOpen(false);
     router.push('/');
   }
 
   function handleAccountClick() {
     if (session) {
-      setAccountMenuOpen(!accountMenuOpen);
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        setAccountDrawerOpen(true);
+      } else {
+        setAccountMenuOpen(!accountMenuOpen);
+      }
     } else {
       setAuthModalOpen(true);
     }
@@ -119,14 +174,19 @@ export function Header() {
 
   const isTransparent = pathname === '/' && !isScrolled;
 
+  const userDisplayName =
+    session?.user?.user_metadata?.full_name ||
+    session?.user?.email?.split('@')[0] ||
+    'Valued Client';
+
   return (
     <>
       <header
         ref={headerRef}
         className={`transition-all duration-300 ease-in-out ${
           isTransparent
-            ? 'absolute top-0 left-0 right-0 z-40 bg-transparent text-white border-b border-transparent shadow-none backdrop-blur-none'
-            : 'fixed top-0 left-0 right-0 z-40 bg-[#FAF9F6] text-[#111111] border-b border-[#EAEAEA] shadow-sm backdrop-blur-md'
+            ? 'absolute top-0 left-0 right-0 z-[1000] bg-transparent text-white border-b border-transparent shadow-none backdrop-blur-none'
+            : 'fixed top-0 left-0 right-0 z-[1000] bg-[#FAF9F6] text-[#111111] border-b border-[#EAEAEA] shadow-sm backdrop-blur-md'
         }`}
       >
         <nav className="flex items-center justify-between px-4 sm:px-8 md:px-14 py-4 max-w-[1440px] mx-auto min-h-[64px] w-full">
@@ -188,19 +248,120 @@ export function Header() {
               </svg>
             </button>
 
-            <button
-              onClick={handleAccountClick}
-              aria-label="Account Profile"
-              className="hidden md:flex p-1 hover:opacity-60 transition-opacity relative"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} className="w-5 h-5">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              {session && (
-                <span className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-current" />
+            {/* Account Icon Wrapper */}
+            <div ref={accountContainerRef} className="relative inline-block">
+              <button
+                onClick={handleAccountClick}
+                aria-label="Account Profile"
+                className="flex p-1 hover:opacity-60 transition-opacity relative"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} className="w-5 h-5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                {session && (
+                  <span className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-current" />
+                )}
+              </button>
+
+              {/* Desktop / Tablet Premium Floating Account Dropdown Card */}
+              {session && accountMenuOpen && (
+                <div
+                  className="hidden md:block absolute right-0 top-[calc(100%+16px)] z-[1100] w-[260px] bg-[#FAF9F6] border border-[#EAEAEA] rounded-[12px] shadow-[0_12px_32px_rgba(0,0,0,0.08)] p-[18px] font-inter text-xs animate-account-dropdown"
+                >
+                  {/* User Profile Info Header */}
+                  <div className="pb-3 border-b border-[#EAEAEA]">
+                    <div className="font-oswald text-sm font-semibold uppercase text-[#111111] truncate tracking-wide">
+                      {userDisplayName}
+                    </div>
+                    <div className="font-mono text-[#666666] text-[0.68rem] truncate lowercase mt-0.5">
+                      {session.user.email}
+                    </div>
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="pt-2 space-y-0.5">
+                    <Link
+                      href="/profile"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#666666]">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                      <span className="font-inter text-xs font-medium">My Profile</span>
+                    </Link>
+
+                    <Link
+                      href="/profile?tab=orders"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#666666]">
+                        <path d="M6 7h12l1 14H5L6 7Z" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M9 7V5a3 3 0 0 1 6 0v2" strokeLinecap="round" />
+                      </svg>
+                      <span className="font-inter text-xs font-medium">My Orders</span>
+                    </Link>
+
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#666666]">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                      <span className="font-inter text-xs font-medium">Wishlist</span>
+                      {wishlistCount > 0 && (
+                        <span className="ml-auto bg-[#111111] text-white text-[0.6rem] font-mono rounded-full px-1.5 py-0.5">
+                          {wishlistCount}
+                        </span>
+                      )}
+                    </Link>
+
+                    <Link
+                      href="/profile?tab=addresses"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#666666]">
+                        <path d="M12 21s-7-5.33-7-10a7 7 0 0 1 14 0c0 4.67-7 10-7 10z" />
+                        <circle cx="12" cy="11" r="2.5" />
+                      </svg>
+                      <span className="font-inter text-xs font-medium">Addresses</span>
+                    </Link>
+
+                    <Link
+                      href="/profile?tab=security"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#666666]">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.75 1.75 0 0 0 .34 1.87M4.6 9a1.75 1.75 0 0 0-.34-1.87M9 4.6a1.75 1.75 0 0 0 1-1.55M15 19.4a1.75 1.75 0 0 0-1-1.55" />
+                      </svg>
+                      <span className="font-inter text-xs font-medium">Settings</span>
+                    </Link>
+
+                    <div className="pt-2 border-t border-[#EAEAEA] mt-2">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-[#DC2626] hover:bg-[#FEE2E2]/60 transition-colors"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#DC2626]">
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span className="font-inter text-xs font-semibold">Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
 
             <Link
               href="/wishlist"
@@ -220,7 +381,13 @@ export function Header() {
             </Link>
 
             <button
-              onClick={() => setCartDrawerOpen(true)}
+              onClick={() => {
+                setMobileOpen(false);
+                setSearchOpen(false);
+                setAccountMenuOpen(false);
+                setAccountDrawerOpen(false);
+                setCartDrawerOpen(true);
+              }}
               aria-label="Open cart drawer"
               className="relative p-1 hover:opacity-60 transition-opacity"
             >
@@ -236,43 +403,120 @@ export function Header() {
                 </span>
               )}
             </button>
-
-            {/* Logged-In Luxury Account Popover Dropdown */}
-            {session && accountMenuOpen && (
-              <div
-                className="absolute right-0 top-10 z-50 w-56 bg-[#FAF9F6] border border-[#EAEAEA] rounded-md shadow-lg p-3 animate-fadeIn space-y-1 font-inter text-xs tracking-wider"
-                onMouseLeave={() => setAccountMenuOpen(false)}
-              >
-                <div className="px-3 py-2 border-b border-[#EAEAEA] mb-1">
-                  <div className="text-[0.65rem] text-[#666666] uppercase">Signed in as</div>
-                  <div className="font-mono text-[#111111] text-[0.7rem] truncate lowercase">{session.user.email}</div>
-                </div>
-
-                <Link
-                  href="/profile"
-                  onClick={() => setAccountMenuOpen(false)}
-                  className="block px-3 py-2 rounded hover:bg-[#ECEAE4] transition-colors"
-                >
-                  My Profile & Orders
-                </Link>
-                <Link
-                  href="/wishlist"
-                  onClick={() => setAccountMenuOpen(false)}
-                  className="block px-3 py-2 rounded hover:bg-[#ECEAE4] transition-colors"
-                >
-                  Wishlist ({wishlistCount})
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 rounded hover:bg-[#ECEAE4] text-[#111111] transition-colors border-t border-[#EAEAEA] mt-1"
-                >
-                  Sign Out
-                </button>
-              </div>
-            )}
           </div>
         </nav>
       </header>
+
+      {/* Mobile Account Drawer (Slide-Over from Right for Mobile) */}
+      {session && accountDrawerOpen && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setAccountDrawerOpen(false);
+          }}
+          className="md:hidden fixed inset-0 z-[1200] bg-[#111111]/80 backdrop-blur-md flex justify-end animate-fadeIn"
+        >
+          <div className="w-4/5 max-w-xs bg-[#FAF9F6] h-full p-6 flex flex-col justify-between border-l border-[#EAEAEA] shadow-2xl overflow-y-auto">
+            <div>
+              <div className="flex justify-between items-center pb-6 border-b border-[#EAEAEA] mb-6">
+                <div>
+                  <span className="font-playfair text-lg tracking-[0.2em] text-[#111111] uppercase block">
+                    Account
+                  </span>
+                  <span className="font-mono text-[#666666] text-[0.65rem] lowercase block truncate max-w-[180px]">
+                    {session.user.email}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setAccountDrawerOpen(false)}
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center font-inter text-sm uppercase text-[#666666] hover:text-[#111111]"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <Link
+                  href="/profile"
+                  onClick={() => setAccountDrawerOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors border-b border-[#EAEAEA]/60"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-[#666666]">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  <span className="font-inter text-xs tracking-wider uppercase font-medium">My Profile</span>
+                </Link>
+
+                <Link
+                  href="/profile?tab=orders"
+                  onClick={() => setAccountDrawerOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors border-b border-[#EAEAEA]/60"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-[#666666]">
+                    <path d="M6 7h12l1 14H5L6 7Z" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M9 7V5a3 3 0 0 1 6 0v2" strokeLinecap="round" />
+                  </svg>
+                  <span className="font-inter text-xs tracking-wider uppercase font-medium">My Orders</span>
+                </Link>
+
+                <Link
+                  href="/wishlist"
+                  onClick={() => setAccountDrawerOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors border-b border-[#EAEAEA]/60"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-[#666666]">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  <span className="font-inter text-xs tracking-wider uppercase font-medium">Wishlist</span>
+                  {wishlistCount > 0 && (
+                    <span className="ml-auto bg-[#111111] text-white text-[0.6rem] font-mono rounded-full px-2 py-0.5">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+
+                <Link
+                  href="/profile?tab=addresses"
+                  onClick={() => setAccountDrawerOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors border-b border-[#EAEAEA]/60"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-[#666666]">
+                    <path d="M12 21s-7-5.33-7-10a7 7 0 0 1 14 0c0 4.67-7 10-7 10z" />
+                    <circle cx="12" cy="11" r="2.5" />
+                  </svg>
+                  <span className="font-inter text-xs tracking-wider uppercase font-medium">Addresses</span>
+                </Link>
+
+                <Link
+                  href="/profile?tab=security"
+                  onClick={() => setAccountDrawerOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-[#111111] hover:bg-[#ECEAE4] transition-colors border-b border-[#EAEAEA]/60"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-[#666666]">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.75 1.75 0 0 0 .34 1.87M4.6 9a1.75 1.75 0 0 0-.34-1.87M9 4.6a1.75 1.75 0 0 0 1-1.55M15 19.4a1.75 1.75 0 0 0-1-1.55" />
+                  </svg>
+                  <span className="font-inter text-xs tracking-wider uppercase font-medium">Settings</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-[#EAEAEA] mt-6">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 bg-[#DC2626] text-white py-3 rounded-lg font-inter text-xs uppercase tracking-wider font-semibold shadow-sm"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Logged-Out Auth Modal / Bottom Sheet */}
       <AuthModal

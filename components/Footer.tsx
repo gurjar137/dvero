@@ -45,7 +45,7 @@ export function Footer() {
           </div>
         </div>
         <div className="flex flex-wrap justify-between gap-4 font-inter text-[0.68rem] tracking-wider text-bg/50 uppercase">
-          <span>© 2026 D&rsquo;Vero Jaipur</span>
+          <span>© 2026 D&rsquo;Vero</span>
           <span>Jaipur, Rajasthan, India</span>
           <span>Instagram · Pinterest</span>
         </div>

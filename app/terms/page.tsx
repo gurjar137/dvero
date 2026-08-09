@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terms & Conditions',
-  description: "Terms and Conditions for purchasing formalwear garments from D'VERO Jaipur.",
+  description: "Terms and Conditions for purchasing formalwear garments from D'VERO.",
 };
 
 export default function TermsPage() {
@@ -11,7 +11,7 @@ export default function TermsPage() {
       <div className="max-w-[900px] mx-auto px-4 sm:px-6">
         <h1 className="font-oswald text-3xl sm:text-4xl uppercase mb-3">Terms & Conditions</h1>
         <p className="font-oswald text-xs uppercase tracking-wider text-mute mb-8 border-b border-line pb-4">
-          Effective Date: July 2026 | D'VERO Jaipur Formalwear
+          Effective Date: July 2026 | D'VERO Formalwear
         </p>
 
         <div className="space-y-8 text-sm leading-relaxed text-ink/90">
@@ -32,7 +32,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-oswald text-lg uppercase text-ink mb-2">3. Intellectual Property</h2>
             <p>
-              All designs, garment photography, branding, and imagery are the exclusive intellectual property of D'VERO Jaipur. Unauthorized reproduction or resale is prohibited.
+              All designs, garment photography, branding, and imagery are the exclusive intellectual property of D'VERO. Unauthorized reproduction or resale is prohibited.
             </p>
           </section>
         </div>

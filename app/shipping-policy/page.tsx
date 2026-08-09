@@ -18,7 +18,7 @@ export default function ShippingPolicyPage() {
           <section>
             <h2 className="font-oswald text-lg uppercase text-ink mb-2">1. Shipping Options & Costs</h2>
             <p>
-              We offer Standard Delivery (4–6 business days, free on orders over ₹4,999 or flat ₹149) and Express Air Courier (2–3 business days).
+              We offer Standard Delivery (4–6 business days, FREE on all orders) and Express Air Courier (2–3 business days, FREE on all orders).
             </p>
           </section>
 

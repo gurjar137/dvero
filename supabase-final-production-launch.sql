@@ -105,6 +105,7 @@ CREATE POLICY "Public read inventory" ON public.inventory FOR SELECT USING (true
 -- 4. ORDERS TABLE
 CREATE TABLE IF NOT EXISTS public.orders (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   order_number text UNIQUE NOT NULL,
   customer_name text NOT NULL,
   email text NOT NULL,
@@ -114,6 +115,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
   state text NOT NULL,
   pincode text NOT NULL,
   payment_method text NOT NULL DEFAULT 'upi',
+  payment_status text DEFAULT 'pending',
   subtotal numeric NOT NULL,
   shipping numeric NOT NULL DEFAULT 0,
   total numeric NOT NULL,
@@ -125,6 +127,8 @@ CREATE TABLE IF NOT EXISTS public.orders (
   created_at timestamptz DEFAULT now()
 );
 
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_status text DEFAULT 'pending';
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS order_notes text;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_method text DEFAULT 'standard';
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS tracking_number text;
@@ -135,6 +139,7 @@ ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_status_check;
 ALTER TABLE public.orders ADD CONSTRAINT orders_status_check
   CHECK (status IN ('processing', 'placed', 'pending', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'));
 
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON public.orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_order_number ON public.orders(order_number);
 CREATE INDEX IF NOT EXISTS idx_orders_email ON public.orders(email);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DESC);

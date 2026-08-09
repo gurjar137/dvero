@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"lib\\\\inventory.ts -> @/lib/supabase/client\":{\"id\":\"lib\\\\inventory.ts -> @/lib/supabase/client\",\"files\":[]}}"

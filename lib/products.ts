@@ -1,9 +1,9 @@
 import { DEFAULT_HOMEPAGE_HERO, DEFAULT_HOMEPAGE_SECTIONS, DEFAULT_HOMEPAGE_THEME, DEFAULT_PROMO_BANNERS } from './homepageDefaults';
 
 export const DEFAULT_SETTINGS = {
-  free_shipping_threshold: 4999,
-  flat_shipping_rate: 149,
-  announcement_text: "Free Shipping On Orders Over ₹4,999 · Easy 14-Day Returns",
+  free_shipping_threshold: 0,
+  flat_shipping_rate: 0,
+  announcement_text: "Free Shipping On All Orders · Easy 14-Day Returns",
   return_window_days: 14,
   category_images: {},
   hero_banners: [],

@@ -21,11 +21,11 @@ const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '500', '
 export const metadata: Metadata = {
   title: {
     default: "D'VERO — Formalwear, Redefined | Luxury Tailoring",
-    template: "%s | D'VERO Jaipur",
+    template: "%s | D'VERO",
   },
   description: 'Luxury modern formalwear designed in Jaipur, India. Premium shirts and precision trousers cut true and built to move.',
   keywords: ['DVERO', 'Formalwear', 'Jaipur Suits', 'Tailored Shirts', 'Men Trousers', 'Luxury Fashion India'],
-  authors: [{ name: "D'VERO Jaipur" }],
+  authors: [{ name: "D'VERO" }],
   metadataBase: new URL('https://dvero.com'),
   alternates: {
     canonical: '/',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 const jsonLdOrg = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: "D'VERO Jaipur",
+  name: "D'VERO",
   url: 'https://dvero.com',
   logo: 'https://dvero.com/logo.png',
   contactPoint: {

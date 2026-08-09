@@ -1,15 +1,17 @@
 'use client';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from './CartContext';
 import { useProducts } from '@/lib/useProducts';
 import { useSettings } from '@/lib/useSettings';
 import { useAuth } from './AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { ProductVisual } from './GarmentIcon';
 import { formatINR } from '@/lib/utils';
 
 export function CartDrawer() {
   const router = useRouter();
+  const pathname = usePathname();
   const { session } = useAuth();
   const {
     cart,
@@ -25,6 +27,36 @@ export function CartDrawer() {
   const { findProduct } = useProducts();
   const { settings, shippingFor } = useSettings();
 
+  // 1. Manage Body Scroll Lock with reliable cleanup
+  useEffect(() => {
+    if (cartDrawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [cartDrawerOpen]);
+
+  // 2. Automatically close drawer on route navigation
+  useEffect(() => {
+    setCartDrawerOpen(false);
+  }, [pathname, setCartDrawerOpen]);
+
+  // 3. Close drawer on Escape key press
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setCartDrawerOpen(false);
+      }
+    }
+    if (cartDrawerOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cartDrawerOpen, setCartDrawerOpen]);
+
   function handleCheckoutClick() {
     setCartDrawerOpen(false);
     if (session?.user) {
@@ -36,7 +68,9 @@ export function CartDrawer() {
 
   if (!cartDrawerOpen) return null;
 
-  const subtotal = cart.reduce((s, c) => {
+  const validItems = cart.filter(c => Boolean(findProduct(c.id)));
+
+  const subtotal = validItems.reduce((s, c) => {
     const p = findProduct(c.id);
     return s + (p ? p.price * c.qty : 0);
   }, 0);
@@ -51,7 +85,7 @@ export function CartDrawer() {
   const freeShippingPct = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-ink/70 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-[2000] overflow-hidden bg-ink/70 backdrop-blur-sm animate-fadeIn">
       <div
         onClick={() => setCartDrawerOpen(false)}
         className="absolute inset-0 cursor-pointer"
@@ -65,7 +99,7 @@ export function CartDrawer() {
             <div>
               <h2 className="font-oswald text-xl uppercase">Shopping Bag</h2>
               <p className="text-xs text-mute font-oswald uppercase tracking-wider">
-                {cart.length} item{cart.length !== 1 ? 's' : ''}
+                {validItems.length} item{validItems.length !== 1 ? 's' : ''}
               </p>
             </div>
             <button
@@ -79,26 +113,17 @@ export function CartDrawer() {
 
           {/* Free Shipping Progress Indicator */}
           <div className="bg-bg border-b border-line p-3 sm:p-4 text-center">
-            {awayFromFreeShipping > 0 ? (
-              <p className="text-xs font-oswald uppercase tracking-wider text-mute mb-1.5">
-                Add <span className="text-ink font-semibold">{formatINR(awayFromFreeShipping)}</span> more for Free Express Shipping
-              </p>
-            ) : (
-              <p className="text-xs font-oswald uppercase tracking-wider text-success mb-1.5 font-semibold">
-                ✓ You Qualified For Free Express Shipping!
-              </p>
-            )}
+            <p className="text-xs font-oswald uppercase tracking-wider text-success mb-1.5 font-semibold">
+              ✓ Free Standard & Express Shipping On All Orders
+            </p>
             <div className="w-full bg-line h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-camelDeep h-full transition-all duration-300"
-                style={{ width: `${freeShippingPct}%` }}
-              />
+              <div className="bg-camelDeep h-full transition-all duration-300 w-full" />
             </div>
           </div>
 
           {/* Cart Items List */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-            {cart.length === 0 ? (
+            {validItems.length === 0 ? (
               <div className="text-center py-16">
                 <svg
                   viewBox="0 0 24 24"
@@ -120,7 +145,7 @@ export function CartDrawer() {
                 </button>
               </div>
             ) : (
-              cart.map((item, index) => {
+              validItems.map((item, index) => {
                 const p = findProduct(item.id);
                 if (!p) return null;
                 return (
@@ -177,7 +202,7 @@ export function CartDrawer() {
           </div>
 
           {/* Footer Summary & Checkout */}
-          {cart.length > 0 && (
+          {validItems.length > 0 && (
             <div className="p-4 sm:p-6 border-t border-line bg-panel space-y-3">
               {appliedCoupon && (
                 <div className="flex justify-between items-center text-xs font-oswald uppercase text-success bg-bg p-2 rounded border border-line">
@@ -198,8 +223,8 @@ export function CartDrawer() {
                   </div>
                 )}
                 <div className="flex justify-between text-mute">
-                  <span>Est. Shipping</span>
-                  <span>{shipping === 0 ? 'Free' : formatINR(shipping)}</span>
+                  <span>Shipping</span>
+                  <span className="text-camelDeep font-semibold">Free</span>
                 </div>
                 <div className="flex justify-between text-sm text-ink font-semibold pt-2 border-t border-line">
                   <span>Total</span>

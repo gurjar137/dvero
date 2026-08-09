@@ -58,13 +58,34 @@ export default function AdminCouponsPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     const cleanCode = code.trim().toUpperCase();
-    if (!cleanCode) return;
+    if (!cleanCode) {
+      showToast('Please enter a valid coupon code');
+      return;
+    }
+
+    const val = Number(discountValue);
+    const minS = Number(minSpend);
+
+    if (isNaN(val) || val <= 0) {
+      showToast('Discount value must be greater than 0');
+      return;
+    }
+
+    if (discountType === 'percent' && val > 100) {
+      showToast('Percentage discount cannot exceed 100%');
+      return;
+    }
+
+    if (isNaN(minS) || minS < 0) {
+      showToast('Minimum order spend cannot be negative');
+      return;
+    }
 
     const payload = {
       code: cleanCode,
       discount_type: discountType,
-      discount_value: Number(discountValue),
-      min_spend: Number(minSpend),
+      discount_value: val,
+      min_spend: minS,
       active,
     };
 

@@ -121,6 +121,7 @@ export type OrderItem = {
 
 export type Order = {
   id: number;
+  customer_id?: string | null;
   order_number: string;
   customer_name: string;
   email: string;
@@ -130,7 +131,8 @@ export type Order = {
   state: string;
   pincode: string;
   payment_method: string;
-  subtotal: number;
+  payment_status?: string;
+  subtotal?: number;
   shipping: number;
   total: number;
   status: 'processing' | 'placed' | 'pending' | 'packed' | 'shipped' | 'out_for_delivery' | 'delivered' | 'cancelled';

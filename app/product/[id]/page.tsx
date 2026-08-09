@@ -21,6 +21,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
   const product = findProduct(params.id);
   const [size, setSize] = useState<string | null>(null);
+  const [sizeError, setSizeError] = useState(false);
   const [qty, setQty] = useState(1);
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [openAcc, setOpenAcc] = useState<'details' | 'care' | 'shipping'>('details');
@@ -56,17 +57,27 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const isSelectedSizeLow = selectedSizeStock !== null && selectedSizeStock > 0 && selectedSizeStock <= 5;
   const isSelectedSizeOut = selectedSizeStock !== null && selectedSizeStock <= 0;
 
+  const [isAdding, setIsAdding] = useState(false);
+
   function handleAdd() {
+    if (isAdding) return;
     if (!size) {
-      setMsg({ text: 'Please select a size.', type: 'error' });
+      setSizeError(true);
+      const el = document.getElementById('size-selector-container');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
     if (stockFor(product!.id, size) <= 0) {
       setMsg({ text: 'This size is out of stock.', type: 'error' });
       return;
     }
-    addToCart(product!.id, size, qty);
-    setMsg({ text: 'Added to bag ✓', type: 'success' });
+    setIsAdding(true);
+    addToCart(product!.id, size, qty, product!.name);
+    setMsg(null);
+    setSizeError(false);
+    setTimeout(() => setIsAdding(false), 400);
   }
 
   const images = product.images && product.images.length ? product.images : [null, null, null];
@@ -148,15 +159,15 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             <p className="text-mute leading-relaxed max-w-[48ch] mb-8 text-sm">{product.description}</p>
 
             {/* Size Selection */}
-            <div className="mb-7">
+            <div id="size-selector-container" className="mb-7">
               <div className="flex justify-between items-center mb-3">
-                <span className="font-oswald text-xs tracking-widest uppercase text-camelDeep">Select Size</span>
+                <span className={`font-oswald text-xs tracking-widest uppercase ${sizeError && !size ? 'text-red-600 font-bold' : 'text-camelDeep'}`}>Select Size</span>
                 <Link href="/contact" className="font-oswald text-xs tracking-wider uppercase border-b border-ink">
                   Size Guide
                 </Link>
               </div>
 
-              <div className="flex gap-2 flex-wrap mb-2">
+              <div className={`flex gap-2 flex-wrap mb-2 p-2 rounded-md transition-all ${sizeError && !size ? 'border-2 border-red-600 bg-red-50/80 dark:bg-red-950/20 ring-2 ring-red-500/20 shadow-sm' : ''}`}>
                 {product.sizes.map(s => {
                   const currentStock = stockFor(product.id, s);
                   const out = currentStock <= 0;
@@ -164,9 +175,16 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                     <button
                       key={s}
                       disabled={out}
-                      onClick={() => setSize(s)}
+                      onClick={() => {
+                        setSize(s);
+                        setSizeError(false);
+                      }}
                       className={`min-w-[48px] min-h-[44px] px-3.5 py-2.5 rounded-sm font-oswald text-sm border transition-all ${
-                        size === s ? 'bg-ink text-bg border-ink' : 'border-line hover:border-ink hover:-translate-y-0.5'
+                        size === s
+                          ? 'bg-ink text-bg border-ink'
+                          : sizeError && !size
+                          ? 'border-red-500 bg-bg hover:border-red-600'
+                          : 'border-line hover:border-ink hover:-translate-y-0.5'
                       } ${out ? 'opacity-35 line-through cursor-not-allowed' : ''}`}
                     >
                       {s}
@@ -174,6 +192,13 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                   );
                 })}
               </div>
+
+              {sizeError && !size && (
+                <div className="font-oswald text-xs uppercase tracking-wider font-bold text-red-600 mt-2.5 px-3 py-2 bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 rounded-md flex items-center gap-2 shadow-sm">
+                  <span className="text-sm leading-none">⚠</span>
+                  <span className="tracking-wider">PLEASE SELECT A SIZE</span>
+                </div>
+              )}
 
               {/* Find My Fit Button */}
               <div className="mt-2.5 mb-1.5">
@@ -251,7 +276,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                       )}
                       {key === 'care' && product.care}
                       {key === 'shipping' &&
-                        'Free shipping on orders over ₹4,999, flat ₹149 otherwise. Standard delivery in 4–7 business days. Easy 14-day returns on unworn pieces with tags attached.'}
+                        'Free Standard & Express Delivery on all orders across India. Standard delivery in 4–6 business days, Express in 2–3 business days. Easy 14-day returns on unworn pieces with tags attached.'}
                     </p>
                   </div>
                 </div>
@@ -328,7 +353,10 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         onClose={() => setFitModalOpen(false)}
         product={product}
         stockFor={stockFor}
-        onSelectSize={(recommendedSize) => setSize(recommendedSize)}
+        onSelectSize={(recommendedSize) => {
+          setSize(recommendedSize);
+          setSizeError(false);
+        }}
       />
     </main>
   );

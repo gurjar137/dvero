@@ -1,1 +1,6 @@
-{}
+{
+  "lib\\inventory.ts -> @/lib/supabase/client": {
+    "id": "lib\\inventory.ts -> @/lib/supabase/client",
+    "files": []
+  }
+}

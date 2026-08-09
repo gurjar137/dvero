@@ -76,8 +76,8 @@ export function SettingsProvider({
     };
   }, [initialSettings, load]);
 
-  function shippingFor(subtotal: number): number {
-    return subtotal >= settings.free_shipping_threshold ? 0 : (subtotal > 0 ? settings.flat_shipping_rate : 0);
+  function shippingFor(_subtotal: number): number {
+    return 0;
   }
 
   return React.createElement(SettingsContext.Provider, { value: { settings, shippingFor, loaded, mounted } }, children);
@@ -119,8 +119,8 @@ export function useSettings() {
     load();
   }, [load]);
 
-  function shippingFor(subtotal: number): number {
-    return subtotal >= settings.free_shipping_threshold ? 0 : (subtotal > 0 ? settings.flat_shipping_rate : 0);
+  function shippingFor(_subtotal: number): number {
+    return 0;
   }
 
   return { settings, shippingFor, loaded, mounted };

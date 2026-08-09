@@ -2,18 +2,32 @@
  * D'VERO — Stock Reservation & Inventory Protection Engine
  */
 
-import { supabase } from '@/lib/supabase/client';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type StockValidationResult = {
   valid: boolean;
   outOfStockItems: Array<{ productId: string; size: string; requestedQty: number; availableQty: number }>;
 };
 
-export async function validateStockAvailability(cartItems: Array<{ id: string; size: string; qty: number }>): Promise<StockValidationResult> {
+export async function validateStockAvailability(
+  cartItems: Array<{ id: string; size: string; qty: number }>,
+  dbClient?: SupabaseClient
+): Promise<StockValidationResult> {
   const outOfStockItems: StockValidationResult['outOfStockItems'] = [];
 
+  let client = dbClient;
+  if (!client) {
+    if (typeof window !== 'undefined') {
+      const { supabase } = await import('@/lib/supabase/client');
+      client = supabase;
+    } else {
+      const { supabaseServer } = await import('@/lib/supabase/server');
+      client = supabaseServer;
+    }
+  }
+
   for (const item of cartItems) {
-    const { data } = await supabase
+    const { data } = await client
       .from('inventory')
       .select('stock')
       .eq('product_id', item.id)
@@ -36,3 +50,4 @@ export async function validateStockAvailability(cartItems: Array<{ id: string; s
     outOfStockItems,
   };
 }
+

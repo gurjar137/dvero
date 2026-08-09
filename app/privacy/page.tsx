@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: "Learn how D'VERO Jaipur collects, protects, and uses client personal information.",
+  description: "Learn how D'VERO collects, protects, and uses client personal information.",
 };
 
 export default function PrivacyPage() {
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <div className="max-w-[900px] mx-auto px-4 sm:px-6">
         <h1 className="font-oswald text-3xl sm:text-4xl uppercase mb-3">Privacy Policy</h1>
         <p className="font-oswald text-xs uppercase tracking-wider text-mute mb-8 border-b border-line pb-4">
-          Effective Date: July 2026 | D'VERO Jaipur Formalwear
+          Effective Date: July 2026 | D'VERO Formalwear
         </p>
 
         <div className="space-y-8 text-sm leading-relaxed text-ink/90">

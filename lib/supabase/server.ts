@@ -1,19 +1,33 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-let serverClient: SupabaseClient | null = null;
+let defaultServerClient: SupabaseClient | null = null;
 
-export function getSupabaseServerClient(): SupabaseClient {
-  if (serverClient) return serverClient;
+export function getSupabaseServerClient(token?: string | null): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  serverClient = createClient(url, key, {
+
+  if (token) {
+    return createClient(url, key, {
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
+  }
+
+  if (defaultServerClient) return defaultServerClient;
+  defaultServerClient = createClient(url, key, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
       detectSessionInUrl: false,
     },
   });
-  return serverClient;
+  return defaultServerClient;
 }
 
 export const supabaseServer = getSupabaseServerClient();

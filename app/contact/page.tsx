@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 const FAQS = [
   { q: 'How do I find my size?', a: 'Each product page lists true-to-size fit notes under Details. If you are between sizes, we recommend sizing up for our boxier, relaxed pieces and sizing true for our Office Fit and Straight Fit trousers.' },
-  { q: 'What are your shipping times?', a: 'Orders ship within 2 business days. Shipping is free on orders over ₹4,999, and a flat ₹149 otherwise. Standard delivery takes 4 to 7 business days across India.' },
+  { q: 'What are your shipping times?', a: 'Orders ship within 2 business days. Shipping is free on all orders across India. Standard delivery takes 4 to 6 business days, and Express takes 2 to 3 business days.' },
   { q: 'What is your returns policy?', a: 'Unworn items with tags attached can be returned within 14 days of delivery for a full refund. Simply reach out through the contact form to start a return.' },
   { q: 'What payment methods do you accept?', a: 'We accept UPI, all major credit and debit cards, and cash on delivery on eligible orders.' },
   { q: 'How should I care for my D Vero pieces?', a: 'Care instructions are listed on each product page under Fabric & Care. Wool-blend and formal trousers are best dry cleaned; cotton shirts can typically be hand washed cold.' }

@@ -21,7 +21,7 @@ export function generateOrderConfirmationEmailHTML(orderNumber: string, name: st
       <p style="text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #888; border-bottom: 1px solid #E5E0D8; padding-bottom: 20px;">Order Confirmation #${orderNumber}</p>
       
       <p style="font-size: 14px; color: #333; line-height: 1.6;">Dear ${name},</p>
-      <p style="font-size: 14px; color: #333; line-height: 1.6;">Thank you for your order with D'VERO Jaipur. Your formalwear order has been reserved and is currently being tailored for dispatch.</p>
+      <p style="font-size: 14px; color: #333; line-height: 1.6;">Thank you for your order with D'VERO. Your formalwear order has been reserved and is currently being tailored for dispatch.</p>
       
       <div style="background: #FFF; padding: 20px; border: 1px solid #E5E0D8; margin: 25px 0;">
         <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #888;">Total Amount Paid</p>
@@ -30,7 +30,7 @@ export function generateOrderConfirmationEmailHTML(orderNumber: string, name: st
         <p style="margin: 5px 0 0 0; font-size: 14px; color: #111;">${deliveryDate}</p>
       </div>
 
-      <p style="font-size: 12px; color: #888; text-align: center; margin-top: 40px;">D'VERO Jaipur — Luxury Formalwear Redefined</p>
+      <p style="font-size: 12px; color: #888; text-align: center; margin-top: 40px;">D'VERO — Luxury Formalwear Redefined</p>
     </div>
   `;
 }

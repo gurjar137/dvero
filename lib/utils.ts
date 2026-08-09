@@ -30,7 +30,7 @@ export function formatLongDate(date: Date): string {
 }
 
 export function generateOrderNumber(): string {
-  return 'DV' + Math.floor(100000 + Math.random() * 900000);
+  return 'DV' + Math.floor(1000000 + Math.random() * 9000000);
 }
 
 export function typeFromCategory(category: string): 'shirt' | 'trouser' {

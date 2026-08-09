@@ -12,11 +12,7 @@ export type ShippingTier = {
   deliveryDate: Date;
 };
 
-export function calculateShippingRates(subtotal: number): { standard: ShippingTier; express: ShippingTier } {
-  const isFreeStandard = subtotal >= 4999;
-  const standardCost = isFreeStandard ? 0 : 149;
-  const expressCost = standardCost + 150;
-
+export function calculateShippingRates(_subtotal: number): { standard: ShippingTier; express: ShippingTier } {
   const now = new Date();
   const standardDate = addBusinessDays(now, 5);
   const expressDate = addBusinessDays(now, 2);
@@ -24,15 +20,15 @@ export function calculateShippingRates(subtotal: number): { standard: ShippingTi
   return {
     standard: {
       method: 'standard',
-      label: isFreeStandard ? 'Free Standard Shipping' : 'Standard Shipping',
-      cost: standardCost,
+      label: 'Free Standard Shipping',
+      cost: 0,
       estimatedDays: 5,
       deliveryDate: standardDate,
     },
     express: {
       method: 'express',
-      label: 'Express Air Courier',
-      cost: expressCost,
+      label: 'Free Express Air Courier',
+      cost: 0,
       estimatedDays: 2,
       deliveryDate: expressDate,
     },

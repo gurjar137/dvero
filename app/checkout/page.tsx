@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/components/CartContext';
 import { useAuth } from '@/components/AuthContext';
@@ -54,21 +55,24 @@ export default function CheckoutPage() {
     }
   }, [session]);
 
+  const [isNavigatingToConfirmation, setIsNavigatingToConfirmation] = useState(false);
+  const isNavigatingRef = useRef(false);
+  const validCartItems = cart.filter(c => c && c.id && c.size && Number(c.qty) > 0 && Boolean(findProduct(c.id)));
+
   useEffect(() => {
-    if (!session?.user) {
-      router.replace('/login?redirect=%2Fcheckout');
-      return;
-    }
-    if (cart.length === 0) {
+    if (isNavigatingRef.current || isNavigatingToConfirmation) return;
+    if (validCartItems.length === 0) {
       router.replace('/bag');
       return;
     }
-    setEmail(session.user.email || '');
-    const metaName = session.user.user_metadata?.full_name;
-    if (metaName) setName(metaName);
-    fetchAddresses();
+    if (session?.user) {
+      setEmail(prev => prev || session.user.email || '');
+      const metaName = session.user.user_metadata?.full_name;
+      if (metaName) setName(prev => prev || metaName);
+      fetchAddresses();
+    }
     loadRazorpayScript();
-  }, [cart, router, session, fetchAddresses]);
+  }, [validCartItems.length, isNavigatingToConfirmation, router, session, fetchAddresses]);
 
   function applyAddress(addr: Address) {
     setSelectedAddrId(addr.id);
@@ -80,16 +84,16 @@ export default function CheckoutPage() {
     setPincode(addr.pincode);
   }
 
-  const subtotal = cart.reduce((s, c) => {
+  const subtotal = validCartItems.reduce((s, c) => {
     const p = findProduct(c.id);
-    return s + (p ? p.price * c.qty : 0);
+    return s + (p ? Number(p.price || 0) * (Number(c.qty) || 0) : 0);
   }, 0);
 
   const discount = calcDiscount(subtotal);
   const discountedSubtotal = Math.max(0, subtotal - discount);
-  const baseShipping = shippingFor(discountedSubtotal);
-  const shippingCost = shippingMethod === 'express' ? baseShipping + 150 : baseShipping;
-  const total = discountedSubtotal + shippingCost;
+  const baseShipping = 0;
+  const shippingCost = 0;
+  const total = discountedSubtotal;
 
   const now = new Date();
   const deliveryEstDays = shippingMethod === 'express' ? 3 : 6;
@@ -99,14 +103,14 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (loading) return; // Prevent duplicate submission
 
-    // 0. Guest Authentication Guard
-    if (!session?.user) {
-      router.replace('/login?redirect=%2Fcheckout');
-      return;
-    }
-
     setLoading(true);
     setError('');
+
+    if (validCartItems.length === 0 || subtotal <= 0) {
+      setError('Your shopping bag is empty or contains unavailable items.');
+      setLoading(false);
+      return;
+    }
 
     // 1. Input Validation
     if (!name.trim() || !email.trim() || !phone.trim() || !address.trim() || !pincode.trim()) {
@@ -135,7 +139,7 @@ export default function CheckoutPage() {
     }
 
     // 3. Stock Overselling Protection
-    const stockCheck = await validateStockAvailability(cart);
+    const stockCheck = await validateStockAvailability(validCartItems, supabase);
     if (!stockCheck.valid) {
       setError('Some items in your bag exceed available stock. Please update quantity.');
       setLoading(false);
@@ -143,9 +147,12 @@ export default function CheckoutPage() {
     }
 
     const orderNumber = generateOrderNumber();
-    const cartSnapshot = [...cart];
+    const cartSnapshot = [...validCartItems];
+
+    const currentUserId = session?.user?.id ?? null;
 
     const orderPayload = {
+      customer_id: currentUserId,
       order_number: orderNumber,
       customer_name: name.trim(),
       email: email.trim(),
@@ -154,7 +161,8 @@ export default function CheckoutPage() {
       city: city.trim(),
       state: stateVal.trim(),
       pincode: pincode.trim(),
-      payment_method: paymentMethod,
+      payment_method: paymentMethod === 'cod' ? 'cod' : 'razorpay',
+      payment_status: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Pending',
       subtotal,
       shipping: shippingCost,
       total,
@@ -166,16 +174,94 @@ export default function CheckoutPage() {
 
     try {
       // Handle Razorpay Modal Checkout for Prepaid (UPI / Card)
-      if (paymentMethod !== 'cod' && typeof window !== 'undefined' && window.Razorpay) {
+      if (paymentMethod !== 'cod') {
+        const isScriptLoaded = await loadRazorpayScript();
+        if (!isScriptLoaded || typeof window === 'undefined' || !window.Razorpay) {
+          throw new Error('Razorpay SDK failed to load. Please check your internet connection and try again.');
+        }
+
+        // 1. Create Razorpay Order Server-Side
+        const createRes = await fetch('/api/razorpay/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cart: cartSnapshot,
+            shippingMethod,
+            couponCode: appliedCoupon?.code,
+            orderNumber,
+          }),
+        });
+
+        const createData = await createRes.json();
+        if (!createRes.ok || !createData.success) {
+          throw new Error(createData.error || 'Could not initialize payment with Razorpay.');
+        }
+
+        const { orderId, amount, currency, keyId } = createData;
+
+        // 2. Open Razorpay Checkout Modal with Server Order ID & Public Key
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_DVEROKey',
-          amount: Math.round(total * 100),
-          currency: 'INR',
-          name: "D'VERO Jaipur",
+          key: keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
+          order_id: orderId,
+          amount,
+          currency: currency || 'INR',
+          name: "D'VERO",
           description: `Order #${orderNumber}`,
           handler: async function (response: any) {
             logAudit('razorpay_payment_success', 'info', { orderNumber, paymentId: response.razorpay_payment_id });
-            await finalizeOrderSubmission(orderPayload, cartSnapshot, orderNumber, estDeliveryDate);
+
+            try {
+              setLoading(true);
+              // 3. Verify Payment Signature Server-Side and Finalize Order
+              const { data: { session: verifySession } } = await supabase.auth.getSession();
+              const verifyToken = verifySession?.access_token;
+
+              const verifyRes = await fetch('/api/razorpay/verify', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(verifyToken ? { Authorization: `Bearer ${verifyToken}` } : {}),
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  orderPayload,
+                  cartSnapshot,
+                  saveAddress,
+                  userId: currentUserId,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              if (!verifyRes.ok || !verifyData.success) {
+                throw new Error(verifyData.error || 'Server payment verification failed.');
+              }
+
+              // 4. Set Session Storage & Redirect to Confirmation
+              sessionStorage.setItem(
+                'dvero_last_order',
+                JSON.stringify({
+                  orderNumber,
+                  total,
+                  deliveryDate: estDeliveryDate.toISOString(),
+                  customerName: name.trim(),
+                  email: email.trim(),
+                  paymentMethod: 'Prepaid (UPI / Card / Razorpay)',
+                  paymentStatus: 'Paid',
+                  shippingAddress: `${address.trim()}, ${city.trim()}, ${stateVal.trim()} - ${pincode.trim()}`,
+                })
+              );
+
+              isNavigatingRef.current = true;
+              setIsNavigatingToConfirmation(true);
+              clearCart();
+              router.push(`/confirmation/${orderNumber}`);
+            } catch (vErr: any) {
+              logAudit('payment_verification_error', 'error', { error: vErr.message });
+              setError(vErr.message || 'Payment verification failed. Please contact support with Payment ID: ' + response.razorpay_payment_id);
+              setLoading(false);
+            }
           },
           modal: {
             ondismiss: function () {
@@ -213,103 +299,70 @@ export default function CheckoutPage() {
     orderNumber: string,
     estDeliveryDate: Date
   ) {
-    // Save address if checked
-    if (session?.user?.id && saveAddress && !selectedAddrId) {
-      await supabase.from('customer_addresses').insert([
-        {
-          customer_id: session.user.id,
-          full_name: name.trim(),
-          phone: phone.trim(),
-          address: address.trim(),
-          city: city.trim(),
-          state: stateVal.trim(),
-          pincode: pincode.trim(),
-          is_default: savedAddresses.length === 0,
-        },
-      ]);
-    }
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const token = currentSession?.access_token;
 
-    let inserted: any;
-    const { data: initialData, error: orderErr } = await supabase.from('orders').insert(orderPayload).select().single();
-
-    if (orderErr) {
-      // Fail-safe recovery for schema mismatch or orders_status_check constraint mismatch
-      const fallbackPayload = { ...orderPayload };
-      
-      if (orderErr.message?.includes('orders_status_check') || orderErr.code === '23514') {
-        fallbackPayload.status = 'processing';
-      }
-      if (orderErr.message?.includes('order_notes') || orderErr.message?.includes('shipping_method') || orderErr.code === 'PGRST204') {
-        delete fallbackPayload.order_notes;
-        delete fallbackPayload.shipping_method;
-      }
-
-      const { data: retryData, error: retryErr } = await supabase.from('orders').insert(fallbackPayload).select().single();
-      if (retryErr) throw retryErr;
-      inserted = retryData;
-    } else {
-      inserted = initialData;
-    }
-
-    const itemRows = cartSnapshot.map(c => {
-      const p = findProduct(c.id);
-      return {
-        order_id: inserted.id,
-        product_id: c.id,
-        product_name: p ? p.name : c.id,
-        size: c.size,
-        qty: c.qty,
-        price: p ? p.price : 0,
-      };
+    const res = await fetch('/api/orders/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        cartSnapshot,
+        shippingMethod,
+        couponCode: appliedCoupon?.code,
+        saveAddress,
+        orderPayload,
+      }),
     });
 
-    const { error: itemsErr } = await supabase.from('order_items').insert(itemRows);
-    if (itemsErr) throw itemsErr;
-
-    // Atomic inventory stock deduction
-    for (const c of cartSnapshot) {
-      const { data: invRow } = await supabase
-        .from('inventory')
-        .select('*')
-        .eq('product_id', c.id)
-        .eq('size', c.size)
-        .maybeSingle();
-
-      if (invRow) {
-        await supabase
-          .from('inventory')
-          .update({ stock: Math.max(0, invRow.stock - c.qty) })
-          .eq('id', invRow.id);
-      }
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Could not complete order — please try again.');
     }
-
-    // Dispatch Order Confirmation Email
-    const emailHtml = generateOrderConfirmationEmailHTML(
-      orderNumber,
-      name.trim(),
-      formatINR(total),
-      estDeliveryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-    );
-    sendEmail({ to: email.trim(), subject: `D'VERO Order Confirmation #${orderNumber}`, html: emailHtml });
 
     sessionStorage.setItem(
       'dvero_last_order',
       JSON.stringify({
-        orderNumber,
-        total,
-        deliveryDate: estDeliveryDate.toISOString(),
+        orderNumber: data.orderNumber || orderNumber,
+        total: data.total || total,
+        deliveryDate: data.deliveryDate || estDeliveryDate.toISOString(),
         customerName: name.trim(),
         email: email.trim(),
         paymentMethod: paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'Prepaid (UPI / Card / Razorpay)',
+        paymentStatus: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Pending',
         shippingAddress: `${address.trim()}, ${city.trim()}, ${stateVal.trim()} - ${pincode.trim()}`,
       })
     );
 
+    isNavigatingRef.current = true;
+    setIsNavigatingToConfirmation(true);
     clearCart();
-    router.push('/confirmation');
+    const finalOrderNumber = data.orderNumber || orderNumber;
+    router.push(`/confirmation/${finalOrderNumber}`);
   }
 
-  if (!session?.user || cart.length === 0) return null;
+  if (isNavigatingRef.current || isNavigatingToConfirmation) {
+    return (
+      <main className="page-fade py-24 text-center min-h-[50vh] flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 border-2 border-ink border-t-transparent rounded-full animate-spin" />
+        <p className="font-oswald text-xs uppercase tracking-widest text-mute">Finalizing Order & Redirecting...</p>
+      </main>
+    );
+  }
+
+  if (validCartItems.length === 0) {
+    return (
+      <main className="page-fade py-24 text-center min-h-[50vh]">
+        <h2 className="font-oswald text-2xl uppercase mb-3">Your Bag Is Empty</h2>
+        <p className="text-mute mb-7 text-sm max-w-[30ch] mx-auto">There are no items in your bag to checkout.</p>
+        <Link href="/" className="font-oswald text-xs tracking-widest uppercase bg-ink text-bg px-8 py-3.5 rounded-sm hover:bg-camelDeep transition-colors inline-block">
+          Explore Shop →
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="page-fade py-8 md:py-16 min-h-[60vh] pb-24 md:pb-16">
@@ -456,7 +509,7 @@ export default function CheckoutPage() {
                     <div className="font-oswald text-xs uppercase font-medium">Standard Delivery</div>
                     <div className="text-[0.7rem] text-mute">4–6 Business Days</div>
                   </div>
-                  <span className="font-oswald text-xs text-camelDeep">{baseShipping === 0 ? 'Free' : formatINR(baseShipping)}</span>
+                  <span className="font-oswald text-xs text-camelDeep font-semibold">FREE</span>
                 </label>
 
                 <label
@@ -469,7 +522,7 @@ export default function CheckoutPage() {
                     <div className="font-oswald text-xs uppercase font-medium">Express Air Courier</div>
                     <div className="text-[0.7rem] text-mute">2–3 Business Days</div>
                   </div>
-                  <span className="font-oswald text-xs text-camelDeep">{formatINR(baseShipping + 150)}</span>
+                  <span className="font-oswald text-xs text-camelDeep font-semibold">FREE</span>
                 </label>
               </div>
             </div>
@@ -515,7 +568,7 @@ export default function CheckoutPage() {
             <h3 className="font-oswald text-base uppercase mb-4 border-b border-line pb-3">Order Breakdown</h3>
 
             <div className="space-y-3 max-h-60 overflow-y-auto pr-1 mb-4 border-b border-line pb-4">
-              {cart.map((c, i) => {
+              {validCartItems.map((c, i) => {
                 const p = findProduct(c.id);
                 return (
                   <div key={i} className="flex justify-between text-xs text-mute">
@@ -541,8 +594,8 @@ export default function CheckoutPage() {
                 <span>{formatINR(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping ({shippingMethod})</span>
-                <span>{shippingCost === 0 ? 'Free' : formatINR(shippingCost)}</span>
+                <span>Shipping ({shippingMethod === 'express' ? 'Express' : 'Standard'})</span>
+                <span className="text-camelDeep font-semibold">FREE</span>
               </div>
               <div className="flex justify-between text-ink font-semibold border-t border-line pt-3 text-sm">
                 <span>Total Payable</span>
@@ -554,7 +607,31 @@ export default function CheckoutPage() {
               Est. Delivery Date: <strong className="text-ink">{estDeliveryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</strong>
             </div>
 
-            {error && <p className="text-error text-xs font-oswald uppercase mt-3">{error}</p>}
+            {error && (
+              <div className="bg-red-50/90 border border-red-200 rounded-md p-4 text-xs font-oswald uppercase space-y-2 mt-4 text-red-900 shadow-sm">
+                <div className="font-bold flex items-center gap-2 text-sm text-red-700">
+                  <span>⚠️</span> WE COULDN&apos;T COMPLETE YOUR ORDER
+                </div>
+                <p className="font-inter normal-case text-xs text-red-800 leading-relaxed">
+                  {error} Your cart has not been lost.
+                </p>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="submit"
+                    className="bg-ink text-bg px-4 py-2.5 rounded text-[0.7rem] uppercase tracking-wider font-oswald hover:bg-camelDeep transition-colors min-h-[36px]"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/bag')}
+                    className="border border-line bg-bg text-ink px-4 py-2.5 rounded text-[0.7rem] uppercase tracking-wider font-oswald hover:border-ink transition-colors min-h-[36px]"
+                  >
+                    Back to Bag
+                  </button>
+                </div>
+              </div>
+            )}
 
             <button
               disabled={loading}

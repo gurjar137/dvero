@@ -40,7 +40,9 @@ export default function BagPage() {
     }
   }
 
-  const subtotal = cart.reduce((s, c) => {
+  const validItems = cart.filter(c => Boolean(findProduct(c.id)));
+
+  const subtotal = validItems.reduce((s, c) => {
     const p = findProduct(c.id);
     return s + (p ? p.price * c.qty : 0);
   }, 0);
@@ -63,7 +65,7 @@ export default function BagPage() {
     setApplying(false);
   }
 
-  if (cart.length === 0 && savedForLater.length === 0) {
+  if (validItems.length === 0 && savedForLater.length === 0) {
     return (
       <main className="page-fade py-24 text-center min-h-[50vh]">
         <h2 className="font-oswald text-2xl uppercase mb-3">Your Bag Is Empty</h2>
@@ -82,7 +84,7 @@ export default function BagPage() {
         <div className="mb-6 md:mb-9 flex justify-between items-end border-b border-line pb-4">
           <div>
             <h1 className="font-oswald text-2xl sm:text-3xl uppercase">Shopping Bag</h1>
-            <p className="text-mute text-xs sm:text-sm mt-1">{cart.length} item{cart.length !== 1 ? 's' : ''}</p>
+            <p className="text-mute text-xs sm:text-sm mt-1">{validItems.length} item{validItems.length !== 1 ? 's' : ''}</p>
           </div>
           <Link href="/" className="font-oswald text-xs tracking-wider uppercase border-b border-ink hidden sm:inline">
             Continue Shopping →
@@ -90,18 +92,14 @@ export default function BagPage() {
         </div>
 
         {/* Free Shipping Progress Indicator */}
-        {cart.length > 0 && (
+        {validItems.length > 0 && (
           <div className="bg-panel border border-line rounded-md p-4 mb-6 shadow-sm2">
             <div className="flex justify-between items-center text-xs font-oswald uppercase tracking-wider mb-2">
-              {awayFromFreeShipping > 0 ? (
-                <span>Add <strong className="text-camelDeep">{formatINR(awayFromFreeShipping)}</strong> more for Free Shipping</span>
-              ) : (
-                <span className="text-success font-semibold">✓ You Unlocked Free Express Delivery!</span>
-              )}
-              <span>{freeShippingPct}%</span>
+              <span className="text-success font-semibold">✓ Free Standard & Express Shipping On All Orders</span>
+              <span>100%</span>
             </div>
             <div className="w-full bg-line h-2 rounded-full overflow-hidden">
-              <div className="bg-camelDeep h-full transition-all duration-300" style={{ width: `${freeShippingPct}%` }} />
+              <div className="bg-camelDeep h-full transition-all duration-300 w-full" />
             </div>
           </div>
         )}
@@ -189,7 +187,7 @@ export default function BagPage() {
           </div>
 
           {/* Summary Card */}
-          {cart.length > 0 && (
+          {validItems.length > 0 && (
             <div className="bg-panel rounded-md border border-line shadow-md2 p-6 md:p-8 md:sticky md:top-24">
               <h3 className="font-oswald text-base uppercase mb-4 border-b border-line pb-3">Order Summary</h3>
 
@@ -226,7 +224,7 @@ export default function BagPage() {
                 {discount > 0 && (
                   <div className="flex justify-between text-success font-oswald"><span>Coupon Discount</span><span>-{formatINR(discount)}</span></div>
                 )}
-                <div className="flex justify-between"><span>Shipping</span><span>{shipping === 0 ? 'Free' : formatINR(shipping)}</span></div>
+                <div className="flex justify-between"><span>Shipping</span><span className="text-camelDeep font-semibold font-oswald uppercase">Free</span></div>
               </div>
 
               <div className="flex justify-between font-oswald text-base pt-4 mt-4 border-t border-line text-ink font-semibold">
@@ -246,7 +244,7 @@ export default function BagPage() {
       </div>
 
       {/* Sticky Mobile Checkout Bar */}
-      {cart.length > 0 && (
+      {validItems.length > 0 && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-bg border-t border-line p-3 z-40 shadow-2xl flex items-center justify-between">
           <div>
             <div className="text-[0.65rem] font-oswald uppercase text-mute">Total Amount</div>
