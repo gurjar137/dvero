@@ -1,11 +1,6 @@
 {
   "/page": "app/page.js",
-  "/api/razorpay/create-order/route": "app/api/razorpay/create-order/route.js",
-  "/confirmation/[orderNumber]/page": "app/confirmation/[orderNumber]/page.js",
-  "/product/[id]/page": "app/product/[id]/page.js",
-  "/api/razorpay/verify/route": "app/api/razorpay/verify/route.js",
-  "/orders/track/[orderNumber]/page": "app/orders/track/[orderNumber]/page.js",
-  "/checkout/page": "app/checkout/page.js",
-  "/api/orders/[orderNumber]/route": "app/api/orders/[orderNumber]/route.js",
-  "/profile/page": "app/profile/page.js"
+  "/admin/orders/page": "app/admin/orders/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/admin/page": "app/admin/page.js"
 }

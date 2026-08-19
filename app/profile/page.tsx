@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/components/AuthContext';
@@ -12,8 +12,9 @@ import { Address, Order } from '@/lib/types';
 import { formatINR } from '@/lib/utils';
 import { ProductVisual } from '@/components/GarmentIcon';
 import { Toast } from '@/components/Toast';
+import { ContactUsContent } from '@/components/ContactUsContent';
 
-type Tab = 'overview' | 'orders' | 'addresses' | 'profile' | 'notifications' | 'security';
+type Tab = 'overview' | 'orders' | 'addresses' | 'profile' | 'contact' | 'notifications' | 'security';
 
 export default function ProfilePage() {
   const { session, loading: authLoading } = useAuth();
@@ -22,8 +23,16 @@ export default function ProfilePage() {
   const { addToCart, setCartDrawerOpen } = useCart();
   const { findProduct, stockFor } = useProducts();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [tab, setTab] = useState<Tab>('overview');
+
+  useEffect(() => {
+    const tabParam = searchParams?.get('tab') as Tab | null;
+    if (tabParam && ['overview', 'orders', 'addresses', 'profile', 'contact', 'notifications', 'security'].includes(tabParam)) {
+      setTab(tabParam);
+    }
+  }, [searchParams]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -122,17 +131,34 @@ export default function ProfilePage() {
   }
 
   // Cancel Order Action
-  async function handleCancelOrder(orderId: number) {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: 'cancelled' })
-      .eq('id', orderId);
-
-    if (!error) {
-      triggerToast('Order has been cancelled');
-      loadData();
-    } else {
-      triggerToast('Could not cancel order', 'error');
+  async function handleCancelOrder(orderNumber: string) {
+    if (typeof window !== 'undefined' && !window.confirm(`Are you sure you want to cancel Order #${orderNumber}?`)) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/orders/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderNumber }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setOrders(prev => prev.map(o => (o.order_number === orderNumber ? { ...o, status: 'cancelled' } : o)));
+        triggerToast(`Order #${orderNumber} has been cancelled`);
+      } else {
+        const { error } = await supabase
+          .from('orders')
+          .update({ status: 'cancelled' })
+          .eq('order_number', orderNumber);
+        if (!error) {
+          setOrders(prev => prev.map(o => (o.order_number === orderNumber ? { ...o, status: 'cancelled' } : o)));
+          triggerToast(`Order #${orderNumber} has been cancelled`);
+        } else {
+          triggerToast(data.error || 'Could not cancel order', 'error');
+        }
+      }
+    } catch (e) {
+      triggerToast('Error cancelling order', 'error');
     }
   }
 
@@ -251,6 +277,7 @@ export default function ProfilePage() {
     { id: 'orders', label: 'Orders', count: orders.length },
     { id: 'addresses', label: 'Addresses', count: addresses.length },
     { id: 'profile', label: 'Profile' },
+    { id: 'contact', label: 'Contact Us' },
     { id: 'notifications', label: 'Notifications' },
     { id: 'security', label: 'Security' },
   ];
@@ -475,19 +502,17 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="font-oswald text-xs uppercase tracking-wider px-3 py-1 rounded bg-bg border border-line">
+                      <span
+                        className={`font-oswald text-xs uppercase tracking-wider px-3 py-1 rounded border ${
+                          o.status === 'cancelled'
+                            ? 'bg-red-50 text-red-700 border-red-200'
+                            : o.status === 'delivered'
+                            ? 'bg-green-50 text-green-700 border-green-200'
+                            : 'bg-bg text-ink border-line'
+                        }`}
+                      >
                         {o.status.replace(/_/g, ' ')}
                       </span>
-
-                      {/* Cancel Order option if processing */}
-                      {o.status === 'processing' && (
-                        <button
-                          onClick={() => handleCancelOrder(o.id)}
-                          className="font-oswald text-xs uppercase tracking-wider text-error border-b border-error"
-                        >
-                          Cancel Order
-                        </button>
-                      )}
                     </div>
                   </div>
 
@@ -526,12 +551,27 @@ export default function ProfilePage() {
                       >
                         Invoice PDF
                       </Link>
-                      <Link
-                        href={`/orders/return/${o.order_number}`}
-                        className="border border-line font-oswald text-xs uppercase tracking-wider px-4 py-2 rounded hover:border-ink transition-colors min-h-[44px] flex items-center"
-                      >
-                        Return / Exchange
-                      </Link>
+
+                      {/* Order Actions based on Status */}
+                      {o.status === 'delivered' ? (
+                        <Link
+                          href={`/orders/return/${o.order_number}`}
+                          className="bg-ink text-bg font-oswald text-xs uppercase tracking-wider px-4 py-2 rounded hover:bg-camelDeep transition-colors min-h-[44px] flex items-center"
+                        >
+                          Return / Exchange
+                        </Link>
+                      ) : o.status === 'cancelled' ? (
+                        <span className="border border-red-200 bg-red-50 text-red-700 font-oswald text-xs uppercase tracking-wider px-4 py-2 rounded min-h-[44px] flex items-center">
+                          ORDER CANCELLED
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleCancelOrder(o.order_number)}
+                          className="border border-red-300 text-red-700 hover:bg-red-50 font-oswald text-xs uppercase tracking-wider px-4 py-2 rounded transition-colors min-h-[44px] flex items-center cursor-pointer"
+                        >
+                          CANCEL ORDER
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -737,6 +777,9 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* CONTACT US TAB */}
+        {tab === 'contact' && <ContactUsContent showHeader={false} />}
 
         {/* NOTIFICATIONS TAB */}
         {tab === 'notifications' && (

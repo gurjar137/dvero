@@ -69,7 +69,7 @@ export default function BagPage() {
     return (
       <main className="page-fade py-24 text-center min-h-[50vh]">
         <h2 className="font-oswald text-2xl uppercase mb-3">Your Bag Is Empty</h2>
-        <p className="text-mute mb-7 text-sm max-w-[30ch] mx-auto">Looks like you have not added any formalwear pieces yet.</p>
+        <p className="text-mute mb-7 text-sm max-w-[30ch] mx-auto">Looks like you have not added any retro pieces yet.</p>
         <Link href="/" className="font-oswald text-xs tracking-widest uppercase bg-ink text-bg px-8 py-3.5 rounded-sm hover:bg-camelDeep transition-colors inline-block">
           Continue Shopping →
         </Link>

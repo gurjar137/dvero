@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useAdminData } from '@/lib/useAdminData';
 import { useToast } from '@/components/admin/Toast';

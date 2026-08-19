@@ -86,6 +86,12 @@ const ICONS: Record<string, JSX.Element> = {
       <polyline points="21 15 16 10 5 21" />
     </svg>
   ),
+  mail: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  ),
 };
 
 const NAV = [
@@ -93,6 +99,7 @@ const NAV = [
   { href: '/admin/products', label: 'Products', icon: 'box' },
   { href: '/admin/categories', label: 'Categories', icon: 'grid' },
   { href: '/admin/orders', label: 'Orders', icon: 'bag' },
+  { href: '/admin/messages', label: 'Contact Messages', icon: 'mail' },
   { href: '/admin/users', label: 'Customers', icon: 'users' },
   { href: '/admin/inventory', label: 'Inventory', icon: 'layers' },
   { href: '/admin/coupons', label: 'Coupons', icon: 'tag' },

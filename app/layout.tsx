@@ -20,19 +20,19 @@ const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '500', '
 
 export const metadata: Metadata = {
   title: {
-    default: "D'VERO — Formalwear, Redefined | Luxury Tailoring",
+    default: "D'VERO — Modern Retro Menswear | Precision Tailoring",
     template: "%s | D'VERO",
   },
-  description: 'Luxury modern formalwear designed in Jaipur, India. Premium shirts and precision trousers cut true and built to move.',
-  keywords: ['DVERO', 'Formalwear', 'Jaipur Suits', 'Tailored Shirts', 'Men Trousers', 'Luxury Fashion India'],
+  description: 'Modern retro menswear designed in Jaipur, India. Premium shirts and precision trousers tailored by the past, defined for today.',
+  keywords: ['DVERO', 'Retro Menswear', 'Modern Retro', 'Jaipur Tailoring', 'Retro Shirts', 'Men Trousers', 'Luxury Fashion India'],
   authors: [{ name: "D'VERO" }],
   metadataBase: new URL('https://dvero.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: "D'VERO — Luxury Formalwear, Redefined",
-    description: 'Precision tailored formalwear engineered in Jaipur, India.',
+    title: "D'VERO — Modern Retro Menswear",
+    description: 'Precision tailored modern retro menswear engineered in Jaipur, India.',
     url: 'https://dvero.com',
     siteName: "D'VERO",
     locale: 'en_IN',
@@ -40,8 +40,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "D'VERO — Luxury Formalwear",
-    description: 'Precision formalwear designed in Jaipur.',
+    title: "D'VERO — Modern Retro Menswear",
+    description: 'Modern retro menswear designed in Jaipur.',
   },
 };
 

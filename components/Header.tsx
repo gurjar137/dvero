@@ -12,18 +12,25 @@ import { formatINR } from '@/lib/utils';
 import { ProductVisual } from './GarmentIcon';
 import { CartDrawer } from './CartDrawer';
 import { AuthModal } from './AuthModal';
+import { SearchOverlay } from './SearchOverlay';
 import { Toast } from './Toast';
 import type { AuthSuccessResult } from './AuthFormCore';
 
 export function Header() {
   const { cartCount, setCartDrawerOpen } = useCart();
   const { wishlistCount } = useWishlist();
-  const { session } = useAuth();
+  const { session, authError } = useAuth();
   const { settings } = useSettings();
   const { products } = useProducts();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (authError) {
+      setAuthModalOpen(true);
+    }
+  }, [authError]);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [authToast, setAuthToast] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,7 +199,7 @@ export function Header() {
         <nav className="flex items-center justify-between px-4 sm:px-8 md:px-14 py-4 max-w-[1440px] mx-auto min-h-[64px] w-full">
           
           {/* LEFT: Menu Links (Desktop) / Hamburger (Mobile) */}
-          <div className="flex items-center justify-start gap-6 w-1/3">
+          <div className="flex items-center justify-start gap-3 sm:gap-6 shrink-0 md:w-1/3">
             <button
               onClick={() => setMobileOpen(true)}
               aria-label="Open Mobile Menu"
@@ -224,7 +231,7 @@ export function Header() {
           </div>
 
           {/* CENTER LOGO */}
-          <div className="flex justify-center items-center w-1/3">
+          <div className="flex-1 md:w-1/3 flex justify-center items-center px-2 sm:px-4">
             <Link
               href="/"
               className={`font-playfair text-xl sm:text-2xl tracking-[0.3em] uppercase hover:opacity-75 transition-opacity select-none ${
@@ -236,9 +243,12 @@ export function Header() {
           </div>
 
           {/* RIGHT ICONS: Search, Account, Wishlist, Cart */}
-          <div className="flex items-center justify-end gap-4 sm:gap-6 w-1/3 relative">
+          <div className="flex items-center justify-end gap-3 sm:gap-6 shrink-0 md:w-1/3 relative">
             <button
-              onClick={() => setSearchOpen(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSearchOpen(true);
+              }}
               aria-label="Search"
               className="p-1 hover:opacity-60 transition-opacity"
             >
@@ -533,14 +543,23 @@ export function Header() {
 
       {/* Luxury Mobile Navigation Drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-[#111111]/80 backdrop-blur-md flex animate-fadeIn">
+        <div
+          className="fixed inset-0 z-[1500] bg-[#111111]/80 backdrop-blur-md flex animate-fadeIn"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="w-4/5 max-w-sm bg-[#FAF9F6] h-full p-6 flex flex-col justify-between border-r border-[#EAEAEA] shadow-2xl">
             <div>
               <div className="flex justify-between items-center pb-6 border-b border-[#EAEAEA] mb-6">
                 <span className="font-playfair text-xl tracking-[0.25em] text-[#111111] uppercase">D'VERO</span>
                 <button
-                  onClick={() => setMobileOpen(false)}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center font-inter text-sm uppercase text-[#666666] hover:text-[#111111]"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setMobileOpen(false);
+                  }}
+                  aria-label="Close Mobile Menu"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center font-inter text-sm uppercase text-[#666666] hover:text-[#111111] touch-manipulation cursor-pointer select-none relative z-10"
                 >
                   ✕
                 </button>
@@ -653,83 +672,23 @@ export function Header() {
               )}
             </div>
           </div>
-          <div className="flex-1" onClick={() => setMobileOpen(false)} />
+          <div
+            className="flex-1 cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setMobileOpen(false);
+            }}
+          />
         </div>
       )}
 
-      {/* Debounced Search Drawer / Modal */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-ink/80 backdrop-blur-md flex flex-col items-center pt-12 sm:pt-16 px-4 animate-fadeIn">
-          <div className="max-w-2xl w-full bg-bg border border-line rounded-lg shadow-2xl p-4 sm:p-6 relative">
-            <button
-              onClick={() => {
-                setSearchOpen(false);
-                setSearchQuery('');
-              }}
-              className="absolute top-4 right-4 text-mute hover:text-ink font-oswald text-xs uppercase tracking-wider min-w-[44px] min-h-[44px] flex items-center justify-center"
-            >
-              ✕
-            </button>
-
-            <h3 className="font-oswald text-lg uppercase mb-3">Search Collection</h3>
-            <div className="relative mb-6">
-              <input
-                type="text"
-                autoFocus
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search by garment, fit, fabric or keyword..."
-                className="w-full bg-panel border border-line p-3.5 sm:p-4 rounded-sm font-oswald text-xs sm:text-sm tracking-wider uppercase text-ink outline-none focus:border-ink"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-mute hover:text-ink text-xs font-oswald uppercase"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            <div className="max-h-[60vh] overflow-y-auto pr-1">
-              {!debouncedQuery ? (
-                <div className="text-center py-8 text-mute text-xs font-oswald uppercase tracking-wider">
-                  Type to search across all formalwear
-                </div>
-              ) : searchResults.length === 0 ? (
-                <div className="text-center py-8 text-mute text-xs font-oswald uppercase tracking-wider">
-                  No pieces found matching &ldquo;{debouncedQuery}&rdquo;
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  {searchResults.map(product => (
-                    <Link
-                      key={product.id}
-                      href={`/product/${product.id}`}
-                      onClick={() => {
-                        setSearchOpen(false);
-                        setSearchQuery('');
-                      }}
-                      className="flex gap-4 p-3 rounded-md bg-panel border border-line hover:border-ink transition-all group"
-                    >
-                      <div className="w-14 h-18 bg-bg border border-line rounded flex items-center justify-center flex-shrink-0">
-                        <ProductVisual image={product.images?.[0]} type={product.type} />
-                      </div>
-                      <div className="flex flex-col justify-center">
-                        <span className="font-oswald text-xs uppercase tracking-wider group-hover:text-camelDeep transition-colors">
-                          {product.name}
-                        </span>
-                        <span className="text-[0.7rem] text-mute">{product.fabric}</span>
-                        <span className="font-oswald text-xs text-camelDeep mt-1">{formatINR(product.price)}</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Premium Editorial Search Overlay */}
+      <SearchOverlay
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        products={products}
+      />
 
       {/* Cart Slide-Over Drawer */}
       <CartDrawer />

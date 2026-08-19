@@ -4,15 +4,16 @@ export default function AboutPage() {
       <div className="max-w-[1360px] mx-auto px-4 sm:px-5 md:px-14">
         <div className="text-center py-12 md:py-20 pb-8 md:pb-12">
           <div className="font-cinzel text-camelDeep text-xs tracking-[0.24em] uppercase mb-4">The House Of D Vero</div>
-          <h1 className="font-oswald text-3xl sm:text-4xl md:text-6xl uppercase max-w-[16ch] mx-auto">Formalwear Built To Move.</h1>
+          <h1 className="font-oswald text-3xl sm:text-4xl md:text-6xl uppercase max-w-[18ch] mx-auto">Modern Retro Menswear</h1>
+          <p className="font-inter text-xs sm:text-sm tracking-[0.2em] uppercase text-camelDeep font-medium mt-3">TAILORED BY THE PAST. DEFINED FOR TODAY.</p>
         </div>
 
         <div className="grid md:grid-cols-[0.65fr_1.35fr] gap-8 md:gap-14 py-6 md:py-8 pb-12 md:pb-20">
           <div className="font-cinzel text-camelDeep text-3xl sm:text-4xl md:text-5xl leading-none">Vero.</div>
           <div>
             <p className="text-lg leading-relaxed text-mute mb-5 max-w-[58ch]">Italian for <b className="text-ink font-medium">true</b>. Not the loudest word in the language, but the most load-bearing one.</p>
-            <p className="text-lg leading-relaxed text-mute mb-5 max-w-[58ch]">We started D'VERO because formalwear stopped listening to the people actually wearing it — boardroom cuts made for boardrooms nobody under thirty sits in anymore, fabric that performs for photographs and not for a fourteen-hour day that starts at a desk and ends somewhere else entirely.</p>
-            <p className="text-lg leading-relaxed text-mute mb-5 max-w-[58ch]">So we cut differently. <b className="text-ink font-medium">Shoulders that move. Waists that breathe.</b> Four trouser fits instead of one, because no two people stand the same way in a room. This is formalwear that behaves the way you actually do.</p>
+            <p className="text-lg leading-relaxed text-mute mb-5 max-w-[58ch]">We started D'VERO to bring timeless character back to modern tailoring — classic 70s, 80s, and 90s silhouettes reimagined for contemporary living, crafted with premium fabrics that perform for a fourteen-hour day.</p>
+            <p className="text-lg leading-relaxed text-mute mb-5 max-w-[58ch]">So we cut differently. <b className="text-ink font-medium">Shoulders with character. Waists that breathe.</b> Retro-inspired fits cut for modern comfort. This is menswear tailored by the past, defined for today.</p>
             <div className="flex gap-10 mt-9 flex-wrap">
               {[['06', 'Pieces in Drop 01'], ['100%', 'Designed in Jaipur'], ['2026', 'First Collection']].map(([n, l]) => (
                 <div key={l}><b className="font-oswald text-3xl block">{n}</b><span className="font-oswald text-xs tracking-wider uppercase text-mute">{l}</span></div>

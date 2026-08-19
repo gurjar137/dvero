@@ -169,22 +169,95 @@ export type FeaturedBanner = {
 
 export type HomepageHeroLayout = 'split' | 'full' | 'center';
 
+export type ElementDeviceConfig = {
+  xPosition: number;
+  yPosition: number;
+  alignHorizontal: 'left' | 'center' | 'right';
+  alignVertical: 'top' | 'center' | 'bottom';
+  textAlign: 'left' | 'center' | 'right';
+  fontSize: number;
+  lineHeight?: number;
+  maxWidth?: number;
+};
+
+export type HeroEyebrowElement = {
+  enabled: boolean;
+  text: string;
+  fontWeight: string;
+  letterSpacing: string;
+  textColor: string;
+  zIndex: number;
+  desktop: ElementDeviceConfig;
+  mobile: ElementDeviceConfig;
+};
+
+export type HeroHeadingElement = {
+  enabled: boolean;
+  text: string;
+  fontWeight: string;
+  letterSpacing: string;
+  lineHeight: number;
+  maxWidth: number;
+  textColor: string;
+  zIndex: number;
+  desktop: ElementDeviceConfig;
+  mobile: ElementDeviceConfig;
+};
+
+export type HeroDescriptionElement = {
+  enabled: boolean;
+  text: string;
+  fontWeight: string;
+  letterSpacing: string;
+  lineHeight: number;
+  maxWidth: number;
+  textColor: string;
+  zIndex: number;
+  desktop: ElementDeviceConfig;
+  mobile: ElementDeviceConfig;
+};
+
+export type HeroButtonElement = {
+  enabled: boolean;
+  text: string;
+  link: string;
+  fontWeight: string;
+  letterSpacing: string;
+  textColor: string;
+  bgColor: string;
+  borderColor: string;
+  borderWidth: number;
+  borderRadius: number;
+  buttonWidth: string;
+  buttonHeight: string;
+  zIndex: number;
+  desktop: ElementDeviceConfig;
+  mobile: ElementDeviceConfig;
+};
+
 export type HomepageHero = {
   enabled: boolean;
-  layout: HomepageHeroLayout;
-  label: string;
-  heading: string;
-  description: string;
-  button_text: string;
-  button_link: string;
+  layout?: HomepageHeroLayout;
+  label?: string;
+  heading?: string;
+  description?: string;
+  button_text?: string;
+  button_link?: string;
   desktop_image: string;
   mobile_image: string;
-  image_position: 'top' | 'center' | 'bottom' | 'left' | 'right';
-  image_scale: number;
+  image_position?: 'top' | 'center' | 'bottom' | 'left' | 'right';
+  image_scale?: number;
   overlay_opacity: number;
-  border_radius: number;
-  bg_color: string;
-  text_color: string;
+  border_radius?: number;
+  bg_color?: string;
+  text_color?: string;
+
+  // Independent Element Configuration
+  eyebrow?: HeroEyebrowElement;
+  mainHeading?: HeroHeadingElement;
+  subDescription?: HeroDescriptionElement;
+  cta1?: HeroButtonElement;
+  cta2?: HeroButtonElement;
 };
 
 export type HomepageSectionId =
@@ -354,5 +427,35 @@ export type ReturnRequest = {
   created_at: string;
 };
 
+export type ContactSettings = {
+  id?: string;
+  brand_name: string;
+  email: string;
+  phone: string;
+  whatsapp: string;
+  address: string;
+  google_maps_url: string;
+  hours_monday: string;
+  hours_tuesday: string;
+  hours_wednesday: string;
+  hours_thursday: string;
+  hours_friday: string;
+  hours_saturday: string;
+  hours_sunday: string;
+  instagram_url: string;
+  facebook_url: string;
+  youtube_url: string;
+  page_heading: string;
+  page_description: string;
+  updated_at?: string;
+};
 
-
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'read' | 'resolved';
+  created_at: string;
+};

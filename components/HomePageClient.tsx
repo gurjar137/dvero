@@ -4,7 +4,6 @@ import { useSettings, SettingsProvider } from '@/lib/useSettings';
 import { Hero } from '@/components/Hero';
 import { ProductCard } from '@/components/ProductCard';
 import { BestSellerCard } from '@/components/BestSellerCard';
-import { ShopTheEdit } from '@/components/ShopTheEdit';
 import { HomepageGenericSection } from '@/components/HomepageGenericSection';
 import { HomepageSection, Product, SiteSettings } from '@/lib/types';
 import { DEFAULT_HOMEPAGE_SECTIONS, DEFAULT_HOMEPAGE_THEME } from '@/lib/homepageDefaults';
@@ -79,9 +78,9 @@ function FeaturesStrip() {
 function FeaturedCollectionSection({ section, products, containerWidth }: { section: HomepageSection; products: Product[]; containerWidth: number }) {
   const { stockFor } = useProducts();
   return (
-    <section id="featured-collection" className="py-12 sm:py-16 md:py-24 scroll-mt-20 bg-[#FAF9F6]">
+    <section id="featured-collection" className="py-8 sm:py-12 md:py-16 scroll-mt-20 bg-[#FAF9F6]">
       <div className="mx-auto px-4 sm:px-6 md:px-14" style={{ maxWidth: containerWidth }}>
-        <div className="text-center mb-10 sm:mb-14 md:mb-16">
+        <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <div className="font-inter text-xs tracking-[0.25em] uppercase text-[#666666] mb-2.5">
             {section.subtitle || 'D\'VERO Edits'}
           </div>
@@ -98,6 +97,16 @@ function FeaturedCollectionSection({ section, products, containerWidth }: { sect
     </section>
   );
 }
+
+const EXCLUDED_SECTION_IDS = new Set([
+  'hero',
+  'shop_by_style',
+  'featured_collection',
+  'new_arrivals',
+  'why_dvero',
+  'premium_fabrics',
+  'newsletter',
+]);
 
 function HomePageContent({ initialProducts }: { initialProducts: Product[] }) {
   const { products: clientProducts } = useProducts();
@@ -120,23 +129,23 @@ function HomePageContent({ initialProducts }: { initialProducts: Product[] }) {
 
   return (
     <main className="page-fade bg-[#FAF9F6]">
-      {/* 1. Full-Height Cinematic Hero Banner */}
+      {/* 1. Full-Height Hero Banner */}
       <Hero />
 
-      {/* 2. Immediate Featured Products Grid */}
+      {/* 2. Featured Products Grid */}
       <FeaturedCollectionSection
         section={featuredSection as HomepageSection}
         products={products}
         containerWidth={theme.container_width}
       />
 
-      {/* 3. Brand Promise Strip */}
+      {/* 4. Brand Promise Strip */}
       <FeaturesStrip />
 
-      {/* 4. Optional Generic Sections (e.g. Instagram feed) */}
+      {/* 5. Remaining Essential Sections (Reviews, Instagram) */}
       {sections.map(section => {
-        if (section.id === 'hero' || section.id === 'shop_by_style' || section.id === 'featured_collection') {
-          return null; // Skip category showcase & redundant hero
+        if (EXCLUDED_SECTION_IDS.has(section.id)) {
+          return null;
         }
         return <HomepageGenericSection key={section.id} section={section} theme={theme} />;
       })}

@@ -6,6 +6,7 @@ import { Order } from '@/lib/types';
 
 export default function ReturnRequestPage({ params }: { params: { orderNumber: string } }) {
   const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
   const [type, setType] = useState<'return' | 'exchange'>('return');
   const [reason, setReason] = useState('');
   const [requestedSize, setRequestedSize] = useState('M');
@@ -15,6 +16,19 @@ export default function ReturnRequestPage({ params }: { params: { orderNumber: s
 
   useEffect(() => {
     async function fetchOrder() {
+      // Try API route first, fallback to client DB query
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(params.orderNumber)}`);
+        if (res.ok) {
+          const apiData = await res.json();
+          if (apiData.success && apiData.order) {
+            setOrder(apiData.order as Order);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {}
+
       const { data } = await supabase
         .from('orders')
         .select('*')
@@ -22,6 +36,7 @@ export default function ReturnRequestPage({ params }: { params: { orderNumber: s
         .maybeSingle();
 
       if (data) setOrder(data as Order);
+      setLoading(false);
     }
     fetchOrder();
   }, [params.orderNumber]);
@@ -30,6 +45,10 @@ export default function ReturnRequestPage({ params }: { params: { orderNumber: s
     e.preventDefault();
     if (!reason.trim()) {
       setError('Please provide a reason for your request.');
+      return;
+    }
+    if (order && order.status !== 'delivered') {
+      setError('Return or exchange is only available once your order is delivered.');
       return;
     }
     setSubmitting(true);
@@ -54,6 +73,42 @@ export default function ReturnRequestPage({ params }: { params: { orderNumber: s
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <main className="page-fade py-24 text-center min-h-[50vh]">
+        <p className="font-oswald text-xs uppercase tracking-wider text-mute">Loading Order Details...</p>
+      </main>
+    );
+  }
+
+  // Guard: Return/Exchange is only allowed when order status is 'delivered'
+  if (order && order.status !== 'delivered') {
+    return (
+      <main className="page-fade py-20 text-center min-h-[60vh]">
+        <div className="max-w-md mx-auto bg-panel border border-line p-8 rounded-md shadow-sm2 space-y-4">
+          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto text-amber-800 text-xl font-bold">
+            ⚠️
+          </div>
+          <h2 className="font-oswald text-2xl uppercase">Return / Exchange Unavailable</h2>
+          <p className="text-mute text-xs leading-relaxed font-inter">
+            Return or Exchange requests can only be submitted after your order has been successfully <strong className="text-ink font-oswald uppercase">Delivered</strong>.
+          </p>
+          <div className="bg-bg border border-line p-3 rounded font-oswald text-xs uppercase text-ink">
+            Current Status: <span className="text-camelDeep font-semibold">{order.status.replace(/_/g, ' ')}</span>
+          </div>
+          <div className="pt-2 flex justify-center">
+            <Link
+              href={`/orders/track/${params.orderNumber}`}
+              className="inline-block bg-ink text-bg font-oswald text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm hover:bg-camelDeep transition-colors min-h-[44px] flex items-center"
+            >
+              Track Order Status →
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   if (submitted) {
