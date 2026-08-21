@@ -193,7 +193,7 @@ export default function AdminCategoriesPage() {
                     type="text"
                     value={currentImg}
                     onChange={e => handleImageChange(cat.id, e.target.value)}
-                    placeholder="Image URL (http...)"
+                    placeholder="Image URL (https...)"
                     className="w-full bg-panel border border-line px-3 py-2 text-xs font-mono text-ink rounded outline-none focus:border-ink"
                   />
 

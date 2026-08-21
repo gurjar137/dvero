@@ -1,11 +1,44 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
 
 export function Footer() {
   const [subscribed, setSubscribed] = useState(false);
+  const [socialLinks, setSocialLinks] = useState({
+    instagram: 'https://instagram.com/dvero.in',
+    facebook: 'https://facebook.com/dvero.in',
+    youtube: 'https://youtube.com/@dvero.official',
+  });
   const pathname = usePathname();
+
+  useEffect(() => {
+    async function loadSocialLinks() {
+      try {
+        const { data } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'contact_settings')
+          .maybeSingle();
+
+        if (data?.value) {
+          setSocialLinks({
+            instagram: data.value.instagram_url || 'https://instagram.com/dvero.in',
+            facebook: data.value.facebook_url || 'https://facebook.com/dvero.in',
+            youtube: data.value.youtube_url || 'https://youtube.com/@dvero.official',
+          });
+        }
+      } catch (e) {
+        // Fallback to defaults
+      }
+    }
+
+    loadSocialLinks();
+    const handleSync = () => loadSocialLinks();
+    window.addEventListener('dvero_settings_updated', handleSync);
+    return () => window.removeEventListener('dvero_settings_updated', handleSync);
+  }, []);
 
   if (pathname?.startsWith('/admin')) return null;
 
@@ -94,20 +127,36 @@ export function Footer() {
                 Social
               </h4>
               <div className="flex gap-4 text-xs text-[#CCCCCC]">
-                <a
-                  href="https://instagram.com/dvero.in"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-white transition-colors"
-                >
-                  Instagram
-                </a>
-                <a
-                  href="#"
-                  className="hover:text-white transition-colors"
-                >
-                  Pinterest
-                </a>
+                {socialLinks.instagram && (
+                  <a
+                    href={socialLinks.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    Instagram
+                  </a>
+                )}
+                {socialLinks.facebook && (
+                  <a
+                    href={socialLinks.facebook}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    Facebook
+                  </a>
+                )}
+                {socialLinks.youtube && (
+                  <a
+                    href={socialLinks.youtube}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    YouTube
+                  </a>
+                )}
               </div>
             </div>
           </div>

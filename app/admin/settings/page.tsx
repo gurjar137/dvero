@@ -40,34 +40,48 @@ export default function AdminSettingsPage() {
   const loadContactSettings = useCallback(async () => {
     setContactLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('contact_settings')
+      // 1. Check settings table first (key = 'contact_settings')
+      const { data: settingsRow } = await supabase
+        .from('settings')
         .select('*')
-        .eq('id', 'default')
+        .eq('key', 'contact_settings')
         .maybeSingle();
 
-      if (!error && data) {
-        setContactSettings({
-          brand_name: data.brand_name || DEFAULT_CONTACT_SETTINGS.brand_name,
-          email: data.email || DEFAULT_CONTACT_SETTINGS.email,
-          phone: data.phone || DEFAULT_CONTACT_SETTINGS.phone,
-          whatsapp: data.whatsapp || DEFAULT_CONTACT_SETTINGS.whatsapp,
-          address: data.address || DEFAULT_CONTACT_SETTINGS.address,
-          google_maps_url: data.google_maps_url || DEFAULT_CONTACT_SETTINGS.google_maps_url,
-          hours_monday: data.hours_monday || DEFAULT_CONTACT_SETTINGS.hours_monday,
-          hours_tuesday: data.hours_tuesday || DEFAULT_CONTACT_SETTINGS.hours_tuesday,
-          hours_wednesday: data.hours_wednesday || DEFAULT_CONTACT_SETTINGS.hours_wednesday,
-          hours_thursday: data.hours_thursday || DEFAULT_CONTACT_SETTINGS.hours_thursday,
-          hours_friday: data.hours_friday || DEFAULT_CONTACT_SETTINGS.hours_friday,
-          hours_saturday: data.hours_saturday || DEFAULT_CONTACT_SETTINGS.hours_saturday,
-          hours_sunday: data.hours_sunday || DEFAULT_CONTACT_SETTINGS.hours_sunday,
-          instagram_url: data.instagram_url || DEFAULT_CONTACT_SETTINGS.instagram_url,
-          facebook_url: data.facebook_url || DEFAULT_CONTACT_SETTINGS.facebook_url,
-          youtube_url: data.youtube_url || DEFAULT_CONTACT_SETTINGS.youtube_url,
-          page_heading: data.page_heading || DEFAULT_CONTACT_SETTINGS.page_heading,
-          page_description: data.page_description || DEFAULT_CONTACT_SETTINGS.page_description,
-        });
+      let contactObj = settingsRow?.value;
+
+      // 2. Check contact_settings table fallback if available
+      if (!contactObj) {
+        const { data: contactData } = await supabase
+          .from('contact_settings')
+          .select('*')
+          .limit(1)
+          .maybeSingle();
+
+        if (contactData) {
+          contactObj = contactData;
+        }
       }
+
+      setContactSettings({
+        brand_name: contactObj?.brand_name || DEFAULT_CONTACT_SETTINGS.brand_name,
+        email: contactObj?.email || DEFAULT_CONTACT_SETTINGS.email,
+        phone: contactObj?.phone || DEFAULT_CONTACT_SETTINGS.phone,
+        whatsapp: contactObj?.whatsapp || DEFAULT_CONTACT_SETTINGS.whatsapp,
+        address: contactObj?.address || DEFAULT_CONTACT_SETTINGS.address,
+        google_maps_url: contactObj?.google_maps_url || DEFAULT_CONTACT_SETTINGS.google_maps_url,
+        hours_monday: contactObj?.hours_monday || DEFAULT_CONTACT_SETTINGS.hours_monday,
+        hours_tuesday: contactObj?.hours_tuesday || DEFAULT_CONTACT_SETTINGS.hours_tuesday,
+        hours_wednesday: contactObj?.hours_wednesday || DEFAULT_CONTACT_SETTINGS.hours_wednesday,
+        hours_thursday: contactObj?.hours_thursday || DEFAULT_CONTACT_SETTINGS.hours_thursday,
+        hours_friday: contactObj?.hours_friday || DEFAULT_CONTACT_SETTINGS.hours_friday,
+        hours_saturday: contactObj?.hours_saturday || DEFAULT_CONTACT_SETTINGS.hours_saturday,
+        hours_sunday: contactObj?.hours_sunday || DEFAULT_CONTACT_SETTINGS.hours_sunday,
+        instagram_url: contactObj?.instagram_url || DEFAULT_CONTACT_SETTINGS.instagram_url,
+        facebook_url: contactObj?.facebook_url || DEFAULT_CONTACT_SETTINGS.facebook_url,
+        youtube_url: contactObj?.youtube_url || DEFAULT_CONTACT_SETTINGS.youtube_url,
+        page_heading: contactObj?.page_heading || DEFAULT_CONTACT_SETTINGS.page_heading,
+        page_description: contactObj?.page_description || DEFAULT_CONTACT_SETTINGS.page_description,
+      });
     } catch (e) {
       console.error('Error loading contact settings:', e);
     } finally {
@@ -114,8 +128,7 @@ export default function AdminSettingsPage() {
     setSavingContact(true);
     const fd = new FormData(e.currentTarget);
 
-    const payload = {
-      id: 'default',
+    const payload: ContactSettings = {
       brand_name: (fd.get('brand_name') as string) || DEFAULT_CONTACT_SETTINGS.brand_name,
       email: (fd.get('email') as string) || DEFAULT_CONTACT_SETTINGS.email,
       phone: (fd.get('phone') as string) || DEFAULT_CONTACT_SETTINGS.phone,
@@ -134,16 +147,43 @@ export default function AdminSettingsPage() {
       youtube_url: (fd.get('youtube_url') as string) || DEFAULT_CONTACT_SETTINGS.youtube_url,
       page_heading: (fd.get('page_heading') as string) || DEFAULT_CONTACT_SETTINGS.page_heading,
       page_description: (fd.get('page_description') as string) || DEFAULT_CONTACT_SETTINGS.page_description,
-      updated_at: new Date().toISOString(),
     };
 
     try {
-      const { error } = await supabase.from('contact_settings').upsert(payload);
+      // 1. Primary Save to settings table (key = 'contact_settings')
+      const { error: settingsError } = await supabase
+        .from('settings')
+        .upsert({ key: 'contact_settings', value: payload });
 
-      if (error) throw error;
+      if (settingsError) throw settingsError;
+
+      // 2. Safe attempt to sync compatible fields to contact_settings table
+      try {
+        await supabase.from('contact_settings').upsert({
+          id: 1,
+          google_maps_url: payload.google_maps_url,
+          instagram_url: payload.instagram_url,
+          facebook_url: payload.facebook_url,
+          youtube_url: payload.youtube_url,
+          updated_at: new Date().toISOString(),
+        });
+      } catch (err) {
+        // Safe catch for database schema variations
+      }
+
+      // 3. Cache & Real-Time Event Dispatch
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('dvero_settings_cache');
+        const parsed = cached ? JSON.parse(cached) : {};
+        parsed['contact_settings'] = payload;
+        localStorage.setItem('dvero_settings_cache', JSON.stringify(parsed));
+        localStorage.setItem('dvero_contact_settings_cache', JSON.stringify(payload));
+        window.dispatchEvent(new Event('dvero_settings_updated'));
+      }
 
       showToast('Contact Us information updated successfully — live on the website now');
       setContactSettings(payload);
+      loadSettings();
     } catch (err: any) {
       console.error('Error saving contact settings:', err);
       showToast('Could not save Contact Us settings: ' + (err?.message || ''));
@@ -243,7 +283,7 @@ export default function AdminSettingsPage() {
 
       {/* 2. CONTACT US SETTINGS FORM */}
       {activeTab === 'contact' && (
-        <form onSubmit={saveContactSettings} className="bg-panel border border-line rounded-xl shadow-sm2 p-5 sm:p-7 max-w-3xl space-y-8 animate-fadeIn">
+        <form key={JSON.stringify(contactSettings)} onSubmit={saveContactSettings} className="bg-panel border border-line rounded-xl shadow-sm2 p-5 sm:p-7 max-w-3xl space-y-8 animate-fadeIn">
           {contactLoading ? (
             <div className="text-center py-12 font-oswald text-xs uppercase text-mute">Loading Contact Settings...</div>
           ) : (

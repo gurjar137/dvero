@@ -77,6 +77,14 @@ create table if not exists public.contact_messages (
 -- Index for ordering by creation date
 create index if not exists idx_contact_messages_created_at on public.contact_messages(created_at desc);
 
+-- Ensure status column exists if created manually without it
+alter table public.contact_messages add column if not exists status text not null default 'new';
+
+-- Grant schema usage & table privileges for PostgREST Data API exposure
+grant usage on schema public to anon, authenticated;
+grant all on table public.contact_messages to anon, authenticated;
+grant all on table public.contact_settings to anon, authenticated;
+
 -- Enable RLS on contact_messages
 alter table public.contact_messages enable row level security;
 

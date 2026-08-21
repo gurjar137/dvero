@@ -39,14 +39,37 @@ export function ContactUsContent({ showHeader = true }: { showHeader?: boolean }
 
   const fetchSettings = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('contact_settings')
+      // 1. Check local cache first for zero-latency render
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('dvero_contact_settings_cache');
+        if (cached) {
+          try {
+            setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(cached) });
+          } catch (e) {}
+        }
+      }
+
+      // 2. Fetch from primary settings table (key = 'contact_settings')
+      const { data: settingsRow } = await supabase
+        .from('settings')
         .select('*')
-        .eq('id', 'default')
+        .eq('key', 'contact_settings')
         .maybeSingle();
 
-      if (!error && data) {
-        setSettings({
+      let data = settingsRow?.value;
+
+      // 3. Fallback to contact_settings table if available
+      if (!data) {
+        const { data: tableData } = await supabase
+          .from('contact_settings')
+          .select('*')
+          .limit(1)
+          .maybeSingle();
+        if (tableData) data = tableData;
+      }
+
+      if (data) {
+        const merged: ContactSettings = {
           brand_name: data.brand_name || DEFAULT_SETTINGS.brand_name,
           email: data.email || DEFAULT_SETTINGS.email,
           phone: data.phone || DEFAULT_SETTINGS.phone,
@@ -65,7 +88,11 @@ export function ContactUsContent({ showHeader = true }: { showHeader?: boolean }
           youtube_url: data.youtube_url || DEFAULT_SETTINGS.youtube_url,
           page_heading: data.page_heading || DEFAULT_SETTINGS.page_heading,
           page_description: data.page_description || DEFAULT_SETTINGS.page_description,
-        });
+        };
+        setSettings(merged);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('dvero_contact_settings_cache', JSON.stringify(merged));
+        }
       }
     } catch (e) {
       console.warn('Using fallback contact settings:', e);
@@ -76,6 +103,9 @@ export function ContactUsContent({ showHeader = true }: { showHeader?: boolean }
 
   useEffect(() => {
     fetchSettings();
+    const handleSync = () => fetchSettings();
+    window.addEventListener('dvero_settings_updated', handleSync);
+    return () => window.removeEventListener('dvero_settings_updated', handleSync);
   }, [fetchSettings]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,7 +131,7 @@ export function ContactUsContent({ showHeader = true }: { showHeader?: boolean }
     setSubmitting(true);
 
     try {
-      const { error } = await supabase.from('contact_messages').insert([
+      let { error } = await supabase.from('contact_messages').insert([
         {
           name: cleanName,
           email: cleanEmail,
@@ -110,6 +140,18 @@ export function ContactUsContent({ showHeader = true }: { showHeader?: boolean }
           status: 'new',
         },
       ]);
+
+      if (error && (error.message?.includes('status') || error.code === 'PGRST204')) {
+        const fallbackRes = await supabase.from('contact_messages').insert([
+          {
+            name: cleanName,
+            email: cleanEmail,
+            subject: cleanSubject,
+            message: cleanMessage,
+          },
+        ]);
+        error = fallbackRes.error;
+      }
 
       if (error) throw error;
 
@@ -143,6 +185,28 @@ export function ContactUsContent({ showHeader = true }: { showHeader?: boolean }
     { day: 'Saturday', time: settings.hours_saturday },
     { day: 'Sunday', time: settings.hours_sunday },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-10 animate-pulse">
+        {showHeader && (
+          <div className="border-b border-line pb-6 space-y-3">
+            <div className="h-8 bg-[#EFECE6] rounded w-64"></div>
+            <div className="h-4 bg-[#EFECE6] rounded w-96 max-w-full"></div>
+          </div>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-panel border border-line rounded-lg p-6 h-64 bg-[#F7F5F0]"></div>
+            <div className="bg-panel border border-line rounded-lg p-6 h-48 bg-[#F7F5F0]"></div>
+          </div>
+          <div className="lg:col-span-7">
+            <div className="bg-panel border border-line rounded-lg p-6 sm:p-8 h-96 bg-[#F7F5F0]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10 animate-fadeIn">

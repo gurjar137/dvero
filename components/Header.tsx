@@ -192,8 +192,8 @@ export function Header() {
         ref={headerRef}
         className={`transition-all duration-300 ease-in-out ${
           isTransparent
-            ? 'absolute top-0 left-0 right-0 z-[1000] bg-transparent text-white border-b border-transparent shadow-none backdrop-blur-none'
-            : 'fixed top-0 left-0 right-0 z-[1000] bg-[#FAF9F6] text-[#111111] border-b border-[#EAEAEA] shadow-sm backdrop-blur-md'
+            ? 'absolute top-0 left-0 right-0 z-[1600] bg-transparent text-white border-b border-transparent shadow-none backdrop-blur-none'
+            : 'fixed top-0 left-0 right-0 z-[1600] bg-[#FAF9F6] text-[#111111] border-b border-[#EAEAEA] shadow-sm backdrop-blur-md'
         }`}
       >
         <nav className="flex items-center justify-between px-4 sm:px-8 md:px-14 py-4 max-w-[1440px] mx-auto min-h-[64px] w-full">
